@@ -7,6 +7,8 @@ import { LinkIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { discussionSchema } from "@/lib/schema";
+import { ZodError } from "zod";
 
 export const Discussion = () => {
   const token = localStorage.getItem("canvasApiToken");
@@ -15,11 +17,27 @@ export const Discussion = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [summary, setSummary] = useState("");
+  const [showSkeleton, setShowSkeleton] = useState(false);
 
   const handleSummarize = async () => {
-    setIsLoading(true);
     setShowSummary(false);
+    setSummary("");
+
     try {
+      discussionSchema.parse({ link: discussionLink, customPrompt, token });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+
+    try {
+      setIsLoading(true);
+      toast.info("Fetching discussion posts...", {
+        duration: 30000,
+        id: "fetching",
+      });
       const response = await fetch("/api/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -29,15 +47,30 @@ export const Discussion = () => {
       const data = await response.json();
 
       if (response.ok) {
+        toast.dismiss("fetching");
+        toast.info("Summarizing discussion posts...", {
+          duration: 10000,
+          id: "summarizing",
+        });
         setSummary(data.summary);
-        setIsLoading(false);
-        setShowSummary(true);
+        setShowSkeleton(true);
+        setTimeout(() => {
+          setShowSkeleton(false);
+          setShowSummary(true);
+          toast.dismiss("summarizing");
+          toast.success("Successfully generated summary!");
+        }, 5000);
       } else {
-        setIsLoading(false);
-        toast.error(data.error || "Failed to fetch posts");
+        toast.dismiss("fetching");
+        toast.dismiss("summarizing");
+        toast.error(data.error);
       }
     } catch (error) {
+      toast.dismiss("fetching");
+      toast.dismiss("summarizing");
       toast.error("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -70,13 +103,13 @@ export const Discussion = () => {
           Custom Prompt (Optional)
         </Label>
         <Textarea
-          placeholder="Example: 'What is the most common theme covered in the discussion?'... Leave blank for default summary"
+          placeholder="Example: 'What do the posts say about the theme of Love?'... Leave blank for general summary"
           value={customPrompt}
           onChange={(e) => setCustomPrompt(e.target.value)}
           className="w-full rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 h-24 focus:ring-[#2997FF] dark:focus:ring-[#2997FF] focus:border-transparent"
         />
       </div>
-      {isLoading ? (
+      {showSkeleton ? (
         <div className="space-y-2">
           <Label
             htmlFor="summary"

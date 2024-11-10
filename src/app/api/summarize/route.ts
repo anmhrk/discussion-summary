@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { discussionSchema } from "@/lib/schema";
-import { ZodError } from "zod";
 import OpenAI from "openai";
 
 type Post = {
@@ -193,8 +191,7 @@ async function summarize(discussionContent: string, customPrompt?: string) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { token, link, customPrompt } = discussionSchema.parse(body);
+    const { token, link, customPrompt } = await request.json();
 
     const urlPattern =
       /https?:\/\/([^\/]+)\/courses\/(\d+)\/discussion_topics\/(\d+)/;
@@ -230,12 +227,6 @@ export async function POST(request: Request) {
     const summary = await summarize(formattedData, customPrompt);
     return NextResponse.json({ summary });
   } catch (error) {
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        { error: error.errors[0].message },
-        { status: 400 }
-      );
-    }
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }

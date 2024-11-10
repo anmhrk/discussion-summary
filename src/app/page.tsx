@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Key, LogOut } from "lucide-react";
 import { ThemeToggle } from "./_components/theme-toggle";
-import { Loading } from "@/components/loading";
+import { Spinner } from "@/components/spinner";
 import { Discussion } from "./_components/discussion";
 
 import { Input } from "@/components/ui/input";
@@ -147,7 +147,7 @@ export default function Home() {
                   className="bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                 >
                   {isLoading ? (
-                    <Loading />
+                    <Spinner />
                   ) : (
                     <>
                       <Key className="w-4 h-4" />

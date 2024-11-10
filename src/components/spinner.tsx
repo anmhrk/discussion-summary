@@ -1,4 +1,4 @@
-export const Loading = () => {
+export const Spinner = () => {
   return (
     <div className="items-center flex justify-center h-32">
       <svg
