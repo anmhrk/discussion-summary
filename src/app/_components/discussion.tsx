@@ -4,11 +4,11 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { LinkIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
 import { discussionSchema } from "@/lib/schema";
 import { ZodError } from "zod";
+import { Summary } from "./summary";
 
 export const Discussion = () => {
   const token = localStorage.getItem("canvasApiToken");
@@ -19,7 +19,49 @@ export const Discussion = () => {
   const [summary, setSummary] = useState("");
   const [showSkeleton, setShowSkeleton] = useState(false);
 
+  // Persist data on refresh using local storage
+  useEffect(() => {
+    if (localStorage.getItem("discussionLink")) {
+      setDiscussionLink(
+        localStorage.getItem("discussionLink") || discussionLink
+      );
+    }
+    if (localStorage.getItem("customPrompt")) {
+      setCustomPrompt(localStorage.getItem("customPrompt") || customPrompt);
+    }
+    if (localStorage.getItem("summary")) {
+      setSummary(localStorage.getItem("summary") || summary);
+      setShowSummary(true);
+    }
+  }, []);
+
+  // Toast to show that saved data has been loaded
+  useEffect(() => {
+    const hasShownToast = sessionStorage.getItem("hasShownSavedDataToast");
+
+    if (!hasShownToast) {
+      const hasSavedData =
+        localStorage.getItem("discussionLink") ||
+        localStorage.getItem("customPrompt") ||
+        localStorage.getItem("summary");
+
+      if (hasSavedData) {
+        const timeout = setTimeout(() => {
+          toast.info("Saved data loaded", {
+            duration: 5000,
+            position: "top-center",
+          });
+          sessionStorage.setItem("hasShownSavedDataToast", "true");
+        }, 500);
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, []);
+
   const handleSummarize = async () => {
+    localStorage.removeItem("discussionLink");
+    localStorage.removeItem("customPrompt");
+    localStorage.removeItem("summary");
     setShowSummary(false);
     setSummary("");
 
@@ -27,7 +69,7 @@ export const Discussion = () => {
       discussionSchema.parse({ link: discussionLink, customPrompt, token });
     } catch (error) {
       if (error instanceof ZodError) {
-        toast.error(error.errors[0].message);
+        toast.error(error.errors[0].message, { position: "top-center" });
         return;
       }
     }
@@ -37,6 +79,7 @@ export const Discussion = () => {
       toast.info("Fetching discussion posts...", {
         duration: 30000,
         id: "fetching",
+        position: "top-center",
       });
       const response = await fetch("/api/summarize", {
         method: "POST",
@@ -51,6 +94,7 @@ export const Discussion = () => {
         toast.info("Generating response...", {
           duration: 10000,
           id: "generating",
+          position: "top-center",
         });
         setSummary(data.summary);
         setShowSkeleton(true);
@@ -58,17 +102,24 @@ export const Discussion = () => {
           setShowSkeleton(false);
           setShowSummary(true);
           toast.dismiss("generating");
-          toast.success("Successfully generated response!");
+          toast.success("Successfully generated response!", {
+            position: "top-center",
+          });
+          localStorage.setItem("discussionLink", discussionLink);
+          if (customPrompt) {
+            localStorage.setItem("customPrompt", customPrompt);
+          }
+          localStorage.setItem("summary", data.summary);
         }, 5000);
       } else {
         toast.dismiss("fetching");
         toast.dismiss("generating");
-        toast.error(data.error);
+        toast.error(data.error, { position: "top-center" });
       }
     } catch (error) {
       toast.dismiss("fetching");
       toast.dismiss("generating");
-      toast.error("An unexpected error occurred");
+      toast.error("An unexpected error occurred", { position: "top-center" });
     } finally {
       setIsLoading(false);
     }
@@ -140,38 +191,7 @@ export const Discussion = () => {
             >
               Summary
             </Label>
-            <div className="w-full prose dark:prose-invert prose-sm max-w-none p-4 rounded-lg border border-gray-300 dark:border-[#2D2D2F] bg-white dark:bg-[#1D1D1F] dark:text-white">
-              <ReactMarkdown
-                components={{
-                  h1: ({ children }) => (
-                    <h1 className="text-xl font-bold mb-4">{children}</h1>
-                  ),
-                  h2: ({ children }) => (
-                    <h2 className="text-lg font-semibold mb-3">{children}</h2>
-                  ),
-                  h3: ({ children }) => (
-                    <h3 className="text-base font-medium mb-2">{children}</h3>
-                  ),
-                  ul: ({ children }) => (
-                    <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
-                      {children}
-                    </ul>
-                  ),
-                  li: ({ children }) => (
-                    <li className="text-sm leading-6">{children}</li>
-                  ),
-                  p: ({ children }) => (
-                    <p className="text-sm leading-6 mb-4">{children}</p>
-                  ),
-                  strong: ({ children }) => (
-                    <strong className="font-semibold">{children}</strong>
-                  ),
-                  em: ({ children }) => <em className="italic">{children}</em>,
-                }}
-              >
-                {summary}
-              </ReactMarkdown>
-            </div>
+            <Summary summary={summary} />
           </div>
         )
       )}
