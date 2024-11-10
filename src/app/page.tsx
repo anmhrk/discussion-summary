@@ -5,7 +5,6 @@ import { Key, LogOut } from "lucide-react";
 import { ThemeToggle } from "./_components/theme-toggle";
 import { Spinner } from "@/components/spinner";
 import { Discussion } from "./_components/discussion";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +27,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { tokenSchema } from "@/lib/schema";
+import { ZodError } from "zod";
 
 export default function Home() {
   useEffect(() => {
@@ -44,8 +45,17 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleTokenSubmit = async () => {
-    setIsLoading(true);
     try {
+      tokenSchema.parse({ token: accessToken });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        toast.error(error.errors[0].message, { position: "top-center" });
+        return;
+      }
+    }
+
+    try {
+      setIsLoading(true);
       const response = await fetch("/api/token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -57,15 +67,18 @@ export default function Home() {
       if (response.ok) {
         localStorage.setItem("canvasApiToken", accessToken);
         setIsValidToken(true);
-        setIsLoading(false);
-        toast.success("API token validated successfully");
+        toast.success("API token validated successfully", {
+          position: "top-center",
+        });
       } else {
-        setIsLoading(false);
-        toast.error(data.error || "Failed to validate API token");
+        toast.error(data.error || "Failed to validate API token", {
+          position: "top-center",
+        });
       }
     } catch (error) {
+      toast.error("An unexpected error occurred", { position: "top-center" });
+    } finally {
       setIsLoading(false);
-      toast.error("An unexpected error occurred");
     }
   };
 
@@ -109,7 +122,11 @@ export default function Home() {
                       <AlertDialogAction
                         onClick={() => {
                           localStorage.removeItem("canvasApiToken");
+                          localStorage.removeItem("discussionLink");
+                          localStorage.removeItem("customPrompt");
+                          localStorage.removeItem("summary");
                           setIsValidToken(false);
+                          setAccessToken("");
                         }}
                         className="bg-red-500 hover:bg-red-600 dark:bg-[#FF453A] dark:hover:bg-[#D70015] text-white font-semibold py-2 px-4 rounded-lg transition-colors ml-3"
                       >
@@ -124,13 +141,16 @@ export default function Home() {
             )}
           </div>
           <CardDescription className="text-gray-600 dark:text-[#86868B] mt-2">
-            Summarize Canvas discussion posts with ease
+            Summarize Human Event discussion posts in seconds
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           {!isValidToken ? (
-            <div className="space-y-4">
-              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div className="space-y-2">
+              <Label
+                htmlFor="access-token"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
                 Canvas API Access Token
               </Label>
               <div className="flex space-x-2">

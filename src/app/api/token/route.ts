@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
-import { tokenSchema } from "@/lib/schema";
-import { ZodError } from "zod";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { token } = tokenSchema.parse(body);
+    const { token } = await request.json();
 
     // Validates token by seeing if user exists through Canvas API
     const canvasResponse = await fetch(
@@ -30,18 +27,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const userData = await canvasResponse.json();
-
-    return NextResponse.json({
-      message: "Token validated successfully",
-    });
+    return NextResponse.json({});
   } catch (error) {
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        { error: error.errors[0].message },
-        { status: 400 }
-      );
-    }
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
