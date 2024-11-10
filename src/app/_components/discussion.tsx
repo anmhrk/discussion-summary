@@ -4,15 +4,37 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LinkIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export const Discussion = () => {
+  const token = localStorage.getItem("canvasApiToken");
   const [discussionLink, setDiscussionLink] = useState("");
   const [customPrompt, setCustomPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleSummarize = async () => {
+    try {
+      const response = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ link: discussionLink, customPrompt, token }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log(data);
+      } else {
+        toast.error(data.error);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    }
+  };
+
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-2">
         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
           Discussion Link
         </Label>
@@ -25,7 +47,7 @@ export const Discussion = () => {
             className="rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 focus:ring-[#2997FF] dark:focus:ring-[#2997FF] focus:border-transparent"
           />
           <Button
-            onClick={() => {}}
+            onClick={handleSummarize}
             disabled={isLoading}
             className="bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
