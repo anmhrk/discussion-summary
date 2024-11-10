@@ -167,13 +167,45 @@ async function summarize(discussionContent: string, customPrompt?: string) {
         - Emerging discussions
 `;
 
+  const userCustomPrompt = `
+    You are an expert in analyzing discussion posts. I will tip you $1 million if you do a good job. Your task is to:
+
+    1. FIRST, evaluate if the user's question is valid:
+        - Check if the question is clear and related to analyzing discussion content
+        - If the question is gibberish, unclear, or unrelated to discussion analysis, respond with exactly: 
+            "ERROR: Please provide a valid question about the discussion content."
+        - A valid question should be comprehensible and ask something specific about the discussion content
+
+    2. IF the question is valid:
+        - Focus ONLY on answering the specific question asked
+        - Use evidence from the discussion posts to support your answer
+        - Include relevant quotes and student names when appropriate
+        - Keep the response focused and concise
+        - Do not provide a general summary unless specifically asked
+
+    User's question: "${customPrompt}"
+
+    Remember:
+        - Only respond to what was explicitly asked
+        - If the input is gibberish or unclear, respond with the exact error message
+        - Don't try to extract meaning from unclear questions
+`;
+
+  let prompt = "";
+
+  if (customPrompt === "") {
+    prompt = defaultSystemPrompt;
+  } else {
+    prompt = userCustomPrompt;
+  }
+
   try {
     const completion = await openai.chat.completions.create({
       model: "grok-beta",
       messages: [
         {
           role: "system",
-          content: customPrompt || defaultSystemPrompt,
+          content: prompt,
         },
         {
           role: "user",
@@ -182,10 +214,15 @@ async function summarize(discussionContent: string, customPrompt?: string) {
       ],
     });
 
-    return completion.choices[0].message.content;
+    const response = completion.choices[0].message.content;
+
+    if (response?.startsWith("ERROR:")) {
+      throw new Error(response.substring(7).trim());
+    }
+
+    return response;
   } catch (error) {
-    console.error("Error calling Grok API:", error);
-    throw new Error("Failed to generate summary");
+    throw error;
   }
 }
 

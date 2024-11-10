@@ -48,26 +48,26 @@ export const Discussion = () => {
 
       if (response.ok) {
         toast.dismiss("fetching");
-        toast.info("Summarizing discussion posts...", {
+        toast.info("Generating response...", {
           duration: 10000,
-          id: "summarizing",
+          id: "generating",
         });
         setSummary(data.summary);
         setShowSkeleton(true);
         setTimeout(() => {
           setShowSkeleton(false);
           setShowSummary(true);
-          toast.dismiss("summarizing");
-          toast.success("Successfully generated summary!");
+          toast.dismiss("generating");
+          toast.success("Successfully generated response!");
         }, 5000);
       } else {
         toast.dismiss("fetching");
-        toast.dismiss("summarizing");
+        toast.dismiss("generating");
         toast.error(data.error);
       }
     } catch (error) {
       toast.dismiss("fetching");
-      toast.dismiss("summarizing");
+      toast.dismiss("generating");
       toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -77,13 +77,16 @@ export const Discussion = () => {
   return (
     <>
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <Label
+          htmlFor="discussion-link"
+          className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+        >
           Discussion Link
         </Label>
         <div className="flex space-x-2">
           <Input
             type="url"
-            placeholder="Paste your Canvas discussion link here"
+            placeholder="Paste your discussion link here"
             value={discussionLink}
             onChange={(e) => setDiscussionLink(e.target.value)}
             className="rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 focus:ring-[#2997FF] dark:focus:ring-[#2997FF] focus:border-transparent"
@@ -99,21 +102,28 @@ export const Discussion = () => {
         </div>
       </div>
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <Label
+          htmlFor="custom-prompt"
+          className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+        >
           Custom Prompt (Optional)
         </Label>
         <Textarea
-          placeholder="Example: 'What do the posts say about the theme of Love?'... Leave blank for general summary"
+          id="custom-prompt"
+          placeholder="Example: 'What do the posts say about the theme of love?' Leave blank for a general summary"
           value={customPrompt}
           onChange={(e) => setCustomPrompt(e.target.value)}
-          className="w-full rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 h-24 focus:ring-[#2997FF] dark:focus:ring-[#2997FF] focus:border-transparent"
+          className="w-full rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 h-24 focus:ring-[#2997FF]"
         />
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Note: Non-discussion related prompts will be ignored.
+        </p>
       </div>
       {showSkeleton ? (
         <div className="space-y-2">
           <Label
             htmlFor="summary"
-            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            className="text-sm font-semibold text-gray-700 dark:text-gray-300"
           >
             Summary
           </Label>
@@ -126,7 +136,7 @@ export const Discussion = () => {
           <div className="space-y-2">
             <Label
               htmlFor="summary"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="text-sm font-semibold text-gray-700 dark:text-gray-300"
             >
               Summary
             </Label>
