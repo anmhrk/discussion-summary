@@ -31,58 +31,58 @@ import { tokenSchema } from "@/lib/schema";
 import { ZodError } from "zod";
 
 export default function Home() {
-  useEffect(() => {
-    const token = localStorage.getItem("canvasApiToken");
-    if (token) {
-      setIsValidToken(true);
-    }
-    setIsCheckingToken(false);
-  }, []);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("canvasApiToken");
+  //   if (token) {
+  //     setIsValidToken(true);
+  //   }
+  //   setIsCheckingToken(false);
+  // }, []);
 
-  const [accessToken, setAccessToken] = useState("");
-  const [isValidToken, setIsValidToken] = useState(false);
-  const [isCheckingToken, setIsCheckingToken] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [accessToken, setAccessToken] = useState("");
+  // const [isValidToken, setIsValidToken] = useState(false);
+  // const [isCheckingToken, setIsCheckingToken] = useState(true);
+  // const [isLoading, setIsLoading] = useState(false);
 
-  const handleTokenSubmit = async () => {
-    try {
-      tokenSchema.parse({ token: accessToken });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        toast.error(error.errors[0].message, { position: "top-center" });
-        return;
-      }
-    }
+  // const handleTokenSubmit = async () => {
+  //   try {
+  //     tokenSchema.parse({ token: accessToken });
+  //   } catch (error) {
+  //     if (error instanceof ZodError) {
+  //       toast.error(error.errors[0].message, { position: "top-center" });
+  //       return;
+  //     }
+  //   }
 
-    try {
-      setIsLoading(true);
-      const response = await fetch("/api/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: accessToken }),
-      });
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await fetch("/api/token", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ token: accessToken }),
+  //     });
 
-      const data = await response.json();
+  //     const data = await response.json();
 
-      if (response.ok) {
-        localStorage.setItem("canvasApiToken", accessToken);
-        setIsValidToken(true);
-        toast.success("API token validated successfully", {
-          position: "top-center",
-        });
-      } else {
-        toast.error(data.error || "Failed to validate API token", {
-          position: "top-center",
-        });
-      }
-    } catch (error) {
-      toast.error("An unexpected error occurred", { position: "top-center" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     if (response.ok) {
+  //       localStorage.setItem("canvasApiToken", accessToken);
+  //       setIsValidToken(true);
+  //       toast.success("API token validated successfully", {
+  //         position: "top-center",
+  //       });
+  //     } else {
+  //       toast.error(data.error || "Failed to validate API token", {
+  //         position: "top-center",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     toast.error("An unexpected error occurred", { position: "top-center" });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  if (isCheckingToken) return;
+  // if (isCheckingToken) return;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white p-8">
@@ -92,7 +92,7 @@ export default function Home() {
             <CardTitle className="text-2xl font-semibold">
               Canvas Discussion Summarizer
             </CardTitle>
-            {isValidToken ? (
+            {/* {isValidToken ? (
               <div className="flex items-center space-x-2">
                 <ThemeToggle />
                 <AlertDialog>
@@ -136,16 +136,16 @@ export default function Home() {
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
-            ) : (
-              <ThemeToggle />
-            )}
+            ) : ( */}
+            <ThemeToggle />
+            {/* // )} */}
           </div>
           <CardDescription className="text-gray-600 dark:text-[#86868B] mt-2">
-            Summarize Human Event discussion posts in seconds
+            Generate summaries of Human Event discussion posts in seconds
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
-          {!isValidToken ? (
+          {/* {!isValidToken ? (
             <div className="space-y-2">
               <Label
                 htmlFor="access-token"
@@ -177,9 +177,9 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-          ) : (
-            <Discussion />
-          )}
+          ) : ( */}
+          <Discussion />
+          {/* // )} */}
         </CardContent>
       </Card>
     </div>

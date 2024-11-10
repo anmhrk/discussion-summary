@@ -11,13 +11,18 @@ import { ZodError } from "zod";
 import { Summary } from "./summary";
 
 export const Discussion = () => {
-  const token = localStorage.getItem("canvasApiToken");
+  // const token = localStorage.getItem("canvasApiToken");
   const [discussionLink, setDiscussionLink] = useState("");
   const [customPrompt, setCustomPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [summary, setSummary] = useState("");
   const [showSkeleton, setShowSkeleton] = useState(false);
+  const [isPopulatingData, setIsPopulatingData] = useState(true);
+  const hasSavedData =
+    localStorage.getItem("discussionLink") ||
+    localStorage.getItem("customPrompt") ||
+    localStorage.getItem("summary");
 
   // Persist data on refresh using local storage
   useEffect(() => {
@@ -33,6 +38,8 @@ export const Discussion = () => {
       setSummary(localStorage.getItem("summary") || summary);
       setShowSummary(true);
     }
+
+    setIsPopulatingData(false);
   }, []);
 
   // Toast to show that saved data has been loaded
@@ -40,14 +47,9 @@ export const Discussion = () => {
     const hasShownToast = sessionStorage.getItem("hasShownSavedDataToast");
 
     if (!hasShownToast) {
-      const hasSavedData =
-        localStorage.getItem("discussionLink") ||
-        localStorage.getItem("customPrompt") ||
-        localStorage.getItem("summary");
-
       if (hasSavedData) {
         const timeout = setTimeout(() => {
-          toast.info("Saved data loaded", {
+          toast.info("Previous data loaded", {
             duration: 5000,
             position: "top-center",
           });
@@ -66,7 +68,7 @@ export const Discussion = () => {
     setSummary("");
 
     try {
-      discussionSchema.parse({ link: discussionLink, customPrompt, token });
+      discussionSchema.parse({ link: discussionLink, customPrompt });
     } catch (error) {
       if (error instanceof ZodError) {
         toast.error(error.errors[0].message, { position: "top-center" });
@@ -76,7 +78,7 @@ export const Discussion = () => {
 
     try {
       setIsLoading(true);
-      toast.info("Fetching discussion posts...", {
+      toast.info("Hang tight! Fetching discussion posts...", {
         duration: 30000,
         id: "fetching",
         position: "top-center",
@@ -84,7 +86,7 @@ export const Discussion = () => {
       const response = await fetch("/api/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ link: discussionLink, customPrompt, token }),
+        body: JSON.stringify({ link: discussionLink, customPrompt }),
       });
 
       const data = await response.json();
@@ -125,6 +127,8 @@ export const Discussion = () => {
     }
   };
 
+  if (hasSavedData && isPopulatingData) return null;
+
   return (
     <>
       <div className="space-y-2">
@@ -148,7 +152,7 @@ export const Discussion = () => {
             className="bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LinkIcon className="w-4 h-4" />
-            {isLoading ? "Summarizing..." : "Summarize"}
+            {isLoading ? "Generating..." : "Generate"}
           </Button>
         </div>
       </div>

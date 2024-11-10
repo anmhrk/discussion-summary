@@ -228,7 +228,8 @@ async function summarize(discussionContent: string, customPrompt?: string) {
 
 export async function POST(request: Request) {
   try {
-    const { token, link, customPrompt } = await request.json();
+    const { link, customPrompt } = await request.json();
+    const token = process.env.CANVAS_ACCESS_TOKEN;
 
     const urlPattern =
       /https?:\/\/([^\/]+)\/courses\/(\d+)\/discussion_topics\/(\d+)/;
