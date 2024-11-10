@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Key } from "lucide-react";
+import { Key, LogOut } from "lucide-react";
 import { ThemeToggle } from "./_components/theme-toggle";
 import { Loading } from "@/components/loading";
+import { Discussion } from "./_components/discussion";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,17 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Home() {
   useEffect(() => {
@@ -67,7 +79,49 @@ export default function Home() {
             <CardTitle className="text-2xl font-semibold">
               Canvas Discussion Summarizer
             </CardTitle>
-            <ThemeToggle />
+            {isValidToken ? (
+              <div className="flex items-center space-x-2">
+                <ThemeToggle />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="bg-gray-200 hover:bg-gray-300 dark:bg-[#2D2D2F] dark:hover:bg-[#3D3D3F] text-gray-700 dark:text-gray-300 p-2 rounded-full transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span className="font-semibold">Logout</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-white dark:bg-[#1D1D1F] rounded-2xl p-6 shadow-xl border dark:border-[#2D2D2F]">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Are you sure you want to logout?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="text-gray-600 dark:text-[#86868B] mt-2">
+                        If you logout, you'll have to input your API access
+                        token again.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="mt-6">
+                      <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200 dark:bg-[#2D2D2F] dark:hover:bg-[#3D3D3F] text-gray-700 dark:text-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          localStorage.removeItem("canvasApiToken");
+                          setIsValidToken(false);
+                        }}
+                        className="bg-red-500 hover:bg-red-600 dark:bg-[#FF453A] dark:hover:bg-[#D70015] text-white font-semibold py-2 px-4 rounded-lg transition-colors ml-3"
+                      >
+                        Logout
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            ) : (
+              <ThemeToggle />
+            )}
           </div>
           <CardDescription className="text-gray-600 dark:text-[#86868B] mt-2">
             Summarize Canvas discussion posts with ease
@@ -76,15 +130,11 @@ export default function Home() {
         <CardContent className="p-6 space-y-6">
           {!isValidToken ? (
             <div className="space-y-4">
-              <Label
-                htmlFor="api-token"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Canvas API Access Token
               </Label>
               <div className="flex space-x-2">
                 <Input
-                  id="token"
                   type="password"
                   placeholder="Enter your API access token"
                   value={accessToken}
@@ -93,6 +143,7 @@ export default function Home() {
                 />
                 <Button
                   onClick={handleTokenSubmit}
+                  disabled={isLoading}
                   className="bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                 >
                   {isLoading ? (
@@ -107,7 +158,7 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div>Valid token</div>
+            <Discussion />
           )}
         </CardContent>
       </Card>
