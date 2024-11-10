@@ -17,7 +17,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Canvas Discussion Summarizer",
-  description: "Summarize Canvas discussion threads with ease.",
+  description: "Generate summaries of Human Event discussion posts in seconds",
 };
 
 export default function RootLayout({
