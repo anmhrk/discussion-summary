@@ -19,46 +19,55 @@ export const Discussion = () => {
   const [summary, setSummary] = useState("");
   const [showSkeleton, setShowSkeleton] = useState(false);
   const [isPopulatingData, setIsPopulatingData] = useState(true);
-  const hasSavedData =
-    localStorage.getItem("discussionLink") ||
-    localStorage.getItem("customPrompt") ||
-    localStorage.getItem("summary");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Persist data on refresh using local storage
   useEffect(() => {
-    if (localStorage.getItem("discussionLink")) {
-      setDiscussionLink(
-        localStorage.getItem("discussionLink") || discussionLink
-      );
-    }
-    if (localStorage.getItem("customPrompt")) {
-      setCustomPrompt(localStorage.getItem("customPrompt") || customPrompt);
-    }
-    if (localStorage.getItem("summary")) {
-      setSummary(localStorage.getItem("summary") || summary);
-      setShowSummary(true);
-    }
+    if (isClient) {
+      if (localStorage.getItem("discussionLink")) {
+        setDiscussionLink(
+          localStorage.getItem("discussionLink") || discussionLink
+        );
+      }
+      if (localStorage.getItem("customPrompt")) {
+        setCustomPrompt(localStorage.getItem("customPrompt") || customPrompt);
+      }
+      if (localStorage.getItem("summary")) {
+        setSummary(localStorage.getItem("summary") || summary);
+        setShowSummary(true);
+      }
 
-    setIsPopulatingData(false);
-  }, []);
+      setIsPopulatingData(false);
+    }
+  }, [isClient]);
 
   // Toast to show that saved data has been loaded
   useEffect(() => {
-    const hasShownToast = sessionStorage.getItem("hasShownSavedDataToast");
+    if (isClient) {
+      const hasShownToast = sessionStorage.getItem("hasShownSavedDataToast");
 
-    if (!hasShownToast) {
-      if (hasSavedData) {
-        const timeout = setTimeout(() => {
-          toast.info("Previous data loaded", {
-            duration: 5000,
-            position: "top-center",
-          });
-          sessionStorage.setItem("hasShownSavedDataToast", "true");
-        }, 500);
-        return () => clearTimeout(timeout);
+      if (!hasShownToast) {
+        if (
+          localStorage.getItem("discussionLink") ||
+          localStorage.getItem("customPrompt") ||
+          localStorage.getItem("summary")
+        ) {
+          const timeout = setTimeout(() => {
+            toast.info("Previous data loaded", {
+              duration: 5000,
+              position: "top-center",
+            });
+            sessionStorage.setItem("hasShownSavedDataToast", "true");
+          }, 500);
+          return () => clearTimeout(timeout);
+        }
       }
     }
-  }, []);
+  }, [isClient]);
 
   const handleSummarize = async () => {
     localStorage.removeItem("discussionLink");
@@ -78,7 +87,7 @@ export const Discussion = () => {
 
     try {
       setIsLoading(true);
-      toast.info("Hang tight! Fetching discussion posts...", {
+      toast.info("Hang tight! Working on it...", {
         duration: 30000,
         id: "fetching",
         position: "top-center",
@@ -127,7 +136,7 @@ export const Discussion = () => {
     }
   };
 
-  if (hasSavedData && isPopulatingData) return null;
+  if (!isClient || isPopulatingData) return null;
 
   return (
     <>
