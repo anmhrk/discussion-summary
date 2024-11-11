@@ -52,6 +52,10 @@ function formatDiscussionData(posts: any): string {
       ])
   );
 
+  if (participantMap.size < 8) {
+    return "ERROR: Need at least 8 posts from the section to generate a response.";
+  }
+
   const formattedPosts = posts.view
     .filter((post: Post) => {
       const userName = participantMap.get(post.user_id);
@@ -212,19 +216,13 @@ async function summarize(discussionContent: string, customPrompt?: string) {
           content: discussionContent,
         },
       ],
-      stream: true,
     });
 
-    let summary = "";
-    for await (const chunk of completion) {
-      const content = chunk.choices[0]?.delta?.content || "";
-      if (content.startsWith("ERROR:")) {
-        throw new Error(content.substring(7).trim());
-      }
-      summary += content;
+    const response = completion.choices[0].message.content;
+    if (response?.startsWith("ERROR:")) {
+      throw new Error(response.substring(7).trim());
     }
-
-    return summary;
+    return response;
   } catch (error) {
     throw error;
   }
@@ -265,6 +263,13 @@ export async function POST(request: Request) {
 
     const posts = await canvasResponse.json();
     const formattedData = formatDiscussionData(posts);
+
+    if (formattedData.startsWith("ERROR:")) {
+      return NextResponse.json(
+        { error: formattedData.substring(7).trim() },
+        { status: 400 }
+      );
+    }
 
     const summary = await summarize(formattedData, customPrompt);
     return NextResponse.json({ summary });
