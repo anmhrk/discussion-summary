@@ -212,15 +212,19 @@ async function summarize(discussionContent: string, customPrompt?: string) {
           content: discussionContent,
         },
       ],
+      stream: true,
     });
 
-    const response = completion.choices[0].message.content;
-
-    if (response?.startsWith("ERROR:")) {
-      throw new Error(response.substring(7).trim());
+    let summary = "";
+    for await (const chunk of completion) {
+      const content = chunk.choices[0]?.delta?.content || "";
+      if (content.startsWith("ERROR:")) {
+        throw new Error(content.substring(7).trim());
+      }
+      summary += content;
     }
 
-    return response;
+    return summary;
   } catch (error) {
     throw error;
   }
@@ -274,3 +278,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const runtime = "edge";
