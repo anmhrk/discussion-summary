@@ -4,9 +4,10 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { CSPostHogProvider } from "./_analytics/providers";
 import { Navbar } from "./_components/navbar";
+import { ConvexClientProvider } from "@/components/convex-provider";
 
 export const metadata: Metadata = {
-  title: "Canvas Discussion Summarizer",
+  title: "Human Event Discussion Summarizer",
   description: "Generate summaries of Human Event discussion posts in seconds",
 };
 
@@ -19,16 +20,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <CSPostHogProvider>
         <body className="antialiased">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Navbar />
-            {children}
-            <Toaster richColors />
-          </ThemeProvider>
+          <ConvexClientProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Navbar />
+              {children}
+              <Toaster richColors />
+            </ThemeProvider>
+          </ConvexClientProvider>
         </body>
       </CSPostHogProvider>
     </html>

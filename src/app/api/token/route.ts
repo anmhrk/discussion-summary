@@ -6,7 +6,7 @@ export async function POST(request: Request) {
 
     // Validates token by seeing if user exists through Canvas API
     const canvasResponse = await fetch(
-      "https://canvas.instructure.com/api/v1/users/self",
+      "https://canvas.asu.edu/api/v1/users/self",
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -27,7 +27,11 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({});
+    const userData = await canvasResponse.json();
+
+    return NextResponse.json({
+      userData: { name: userData.name, userId: userData.id },
+    });
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
