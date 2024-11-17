@@ -6,7 +6,7 @@ import { GitIcon } from "@/components/icons";
 
 export const Navbar = () => {
   return (
-    <div className="relative top-0 left-0 w-dvw py-3 px-3 justify-between flex flex-row items-center z-30">
+    <nav className="fixed top-0 left-0 w-dvw py-3 px-3 justify-between flex flex-row items-center z-30">
       <History />
       <div className="flex flex-row gap-3 items-center">
         <Link href="https://github.com/anmolhurkat/discussion-summary">
@@ -17,6 +17,6 @@ export const Navbar = () => {
         </Link>
         <ThemeToggle />
       </div>
-    </div>
+    </nav>
   );
 };

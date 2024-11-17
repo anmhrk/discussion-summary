@@ -1,11 +1,10 @@
-# Canvas Discussion Summarizer
-
 ## TODOS
 
-- [ ] Add back API access token component
+- [ ] Add API access token input, add fallback for testing
 - [ ] Allow selecting specific students to include in response
 - [ ] Add database to save summaries/responses
+- [ ] Vercel AI SDK integration
 - [ ] Rate limit generate requests?
 - [ ] Potentially switch models
-- [ ] Add analytics
-- [ ] Fix dark mode UI, make it look better
+- [ ] Improve analytics
+- [ ] Mobile responsiveness
