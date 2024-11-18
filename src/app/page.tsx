@@ -16,8 +16,6 @@ import { InfoIcon, Spinner } from "@/components/common/icons";
 import { Key } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { tokenSchema } from "@/lib/schema";
-import { ZodError } from "zod";
 import { toast } from "sonner";
 import useAuthStore from "@/lib/useAuthStore";
 
@@ -36,13 +34,9 @@ export default function Home() {
   }, [checkAuth]);
 
   const handleTokenSubmit = async () => {
-    try {
-      tokenSchema.parse({ token: accessToken });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        toast.error(error.errors[0].message, { position: "top-center" });
-        return;
-      }
+    if (accessToken.length < 60 || !accessToken.match(/^[a-zA-Z0-9~]+$/)) {
+      toast.error("Invalid API access token", { position: "top-center" });
+      return;
     }
 
     try {
@@ -99,7 +93,7 @@ export default function Home() {
                 >
                   Canvas API Access Token
                 </Label>
-                <div className="flex space-x-2">
+                <form className="flex space-x-2">
                   <Input
                     type="password"
                     placeholder="Enter your API access token"
@@ -108,7 +102,13 @@ export default function Home() {
                     className="flex-grow rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 focus:ring-[#2997FF] dark:focus:ring-[#2997FF] focus:border-transparent"
                   />
                   <Button
-                    onClick={handleTokenSubmit}
+                    onClick={(e) => {
+                      if (!accessToken) {
+                        return;
+                      }
+                      e.preventDefault();
+                      handleTokenSubmit();
+                    }}
                     disabled={isLoading || !accessToken}
                     className="bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors min-w-[120px]"
                   >
@@ -121,7 +121,7 @@ export default function Home() {
                       </>
                     )}
                   </Button>
-                </div>
+                </form>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Note: Token is stored locally in the browser.
                 </p>

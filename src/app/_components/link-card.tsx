@@ -11,22 +11,42 @@ export const LinkCard = () => {
   const [customPrompt, setCustomPrompt] = useState("");
   const [isLinkValid, setIsLinkValid] = useState<boolean | null>(null);
   const [isValidatingLink, setIsValidatingLink] = useState(false);
+  const [isFetchingStudents, setIsFetchingStudents] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const validateCanvasUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+
+      if (urlObj.hostname !== "canvas.asu.edu") {
+        return false;
+      }
+
+      const pathRegex = /^\/courses\/\d+\/discussion_topics\/\d+$/;
+      return pathRegex.test(urlObj.pathname);
+    } catch {
+      return false;
+    }
+  };
+
+  const fetchStudents = async () => {};
 
   const handleLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+
     setDiscussionLink(value);
     setIsValidatingLink(true);
     setIsLinkValid(null);
 
     setTimeout(() => {
       setIsValidatingLink(false);
-      if (value.toLowerCase().includes("valid")) {
+      const isValid = validateCanvasUrl(value);
+
+      if (isValid) {
         setIsLinkValid(true);
-      } else if (value.toLowerCase().includes("invalid")) {
-        setIsLinkValid(false);
+        setIsFetchingStudents(true);
       } else {
-        setIsLinkValid(null);
+        setIsLinkValid(false);
       }
     }, 1000);
   };
@@ -51,19 +71,19 @@ export const LinkCard = () => {
             onChange={handleLinkChange}
             className="w-full rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 focus:ring-[#2997FF] dark:focus:ring-[#2997FF] focus:border-transparent"
           />
-          {isValidatingLink && (
+          {discussionLink && isValidatingLink && (
             <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
               <Skeleton className="h-4 w-4 rounded-full" />
               <span>Validating link...</span>
             </div>
           )}
-          {isLinkValid === true && (
+          {discussionLink && isLinkValid === true && (
             <div className="flex items-center space-x-2 text-sm text-green-600 dark:text-green-400">
               <CheckCircle2 className="w-4 h-4" />
               <span>Link validated successfully</span>
             </div>
           )}
-          {isLinkValid === false && (
+          {discussionLink && isLinkValid === false && (
             <div className="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400">
               <XCircle className="w-4 h-4" />
               <span>Invalid link</span>
