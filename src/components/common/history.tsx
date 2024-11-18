@@ -1,6 +1,4 @@
-"use client";
-
-import { InfoIcon, PencilEditIcon, MenuIcon } from "@/components/icons";
+import { InfoIcon, PencilEditIcon, MenuIcon } from "@/components/common/icons";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,

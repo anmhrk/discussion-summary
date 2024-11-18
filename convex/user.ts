@@ -24,3 +24,18 @@ export const createUser = mutation({
     }
   },
 });
+
+export const getName = mutation({
+  args: { userId: v.number() },
+  handler: async (ctx, args) => {
+    try {
+      const user = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("userId"), args.userId))
+        .first();
+      return user?.name;
+    } catch (error) {
+      throw new Error("Server error");
+    }
+  },
+});

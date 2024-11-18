@@ -3,12 +3,12 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { CSPostHogProvider } from "./_analytics/providers";
-import { Navbar } from "./_components/navbar";
+import { Navbar } from "../components/common/navbar";
 import { ConvexClientProvider } from "@/components/convex-provider";
 
 export const metadata: Metadata = {
-  title: "Human Event Discussion Summarizer",
-  description: "Generate summaries of Human Event discussion posts in seconds",
+  title: "Canvas Discussion Summarizer",
+  description: "Generate summaries of Human Event discussion boards in seconds",
 };
 
 export default function RootLayout({
