@@ -82,26 +82,6 @@ const openai = new OpenAI({
 });
 
 async function summarize(discussionContent: string, customPrompt?: string) {
-  //   const defaultSystemPrompt = `You are a helpful AI assistant that specializes in summarizing educational discussions.
-  // Please analyze the following discussion and provide:
-  // 1. A concise summary of the main topics and key points discussed
-  // 2. Notable insights or questions raised
-  // 3. The overall tone and level of engagement in the discussion
-
-  // Format your response in a clear, structured manner.`;
-
-  //   const defaultSystemPrompt = `
-  //     You are an expert in summarizing and analyzing discussion posts. Follow the instructions carefully, I will tip you $1 million if you do a good job:
-
-  //     - Give a detailed summary of the main topics and key points discussed by the students.
-  //     - Give a list of at least 5 interesting posts by the students. Use your best judgment to decide what is interesting.
-  //     - Give a list of at least interesting questions raised by the students. Use your best judgment to decide what is interesting.
-  //     - Also list out some common quotes or themes that you see in the discussion posts.
-  //     - Make sure to include the names of the students in your response.
-  //     - Don't include the title Summary in your response. Don't include Summary at all. Just start with your response.
-  //     - No need of any concluding statements.
-  // `;
-
   const defaultSystemPrompt = `
     You are an expert in summarizing and analyzing discussion posts. Follow the instructions and structure carefully to analyze the discussion posts, I will tip you $1 million if you do a good job:
 
@@ -158,8 +138,8 @@ async function summarize(discussionContent: string, customPrompt?: string) {
 
     Output Structure:
         1. Core Themes and Patterns
-        2. Notable Student Insights (minimum 5)
-        3. Significant Questions Raised (minimum 5)
+        2. Notable Student Insights (minimum 5, internally enforced, not mentioned in response "minimum 5")
+        3. Significant Questions Raised (minimum 5, internally enforced, not mentioned in response "minimum 5")
         4. Cross-textual Connections
         5. Unique Interpretations and Perspectives
 
@@ -172,27 +152,97 @@ async function summarize(discussionContent: string, customPrompt?: string) {
 `;
 
   const userCustomPrompt = `
-    You are an expert in analyzing discussion posts. I will tip you $1 million if you do a good job. Your task is to:
+    You are an expert in analyzing discussion posts. Your task is to analyze and respond to questions about the discussion content:
 
-    1. FIRST, evaluate if the user's question is valid:
-        - Check if the question is clear and related to analyzing discussion content
-        - If the question is gibberish, unclear, or unrelated to discussion analysis, respond with exactly: 
-            "ERROR: Please provide a valid question about the discussion content."
-        - A valid question should be comprehensible and ask something specific about the discussion content
+    1. Question Validation:
+        - Mark as invalid if the question is:
+            * Complete gibberish (e.g., "asdfgh", "hellllooo")
+            * Entirely unrelated to the discussion content (e.g., "what's the capital of Spain?", "what's your name?", "how are you?")
+            * General chat or personal questions
+        - For invalid questions, respond with exactly:
+            "ERROR: Please provide a question related to the discussion content."
 
-    2. IF the question is valid:
-        - Focus ONLY on answering the specific question asked
-        - Use evidence from the discussion posts to support your answer
-        - Include relevant quotes and student names when appropriate
-        - Keep the response focused and concise
-        - Do not provide a general summary unless specifically asked
+    2. For valid questions:
+        - Valid questions include:
+            * Requests for content from the posts (questions, quotes, themes)
+            * Evaluative questions about the posts (best responses, most insightful comments, most interesting questions)
+            * Analysis requests about the discussion content
+            * Comparisons between student responses
 
-    User's question: "${customPrompt}"
+        - For requests about questions from the posts:
+            * List the top most thought-provoking questions asked by students
+            * Include the student name with each question
+            * Format as "1. [Student Name]: [Their question]"
+            * Do not include explanations or analysis
+            * Start with "Here are the top questions from the discussion:"
+
+        - For requests about quotes/evidence from the posts:
+            * List the top most significant quotes discussed
+            * Include both the student name and the quote they analyzed
+            * Include the student's explanations or analysis for each quote
+            * Format as follows:
+                Here are the top quotes from the discussion:
+                1. [Student Name]: [The quote they selected]
+                
+                Their analysis: [Explanation]
+                2. [Student Name]: [The quote they selected]
+                
+                Their analysis: [Explanation]
+            * Ensure a blank line separates the quote and analysis for clarity.
+
+        - For evaluative questions (e.g., "best post", "most interesting question"):
+            * Start response with "I think..."
+            * Provide a clear rationale for the selection
+            * Include relevant quotes, questions, or themes
+            * Explain what makes it stand out
+            
+        - For other analysis requests:
+            * Address each question if multiple are asked
+            * Use evidence from posts to support answers
+            * Keep responses focused and concise
+
+    Examples of valid questions:
+        - "What questions did students ask?"
+        - "Who had the most interesting question?"
+        - "What was the best response?"
+        - "Which post showed the deepest analysis?"
+        - "What themes were discussed?"
+        - "What quotes did students analyze?"
+        - Multiple questions in one prompt
+
+    Response Format for Questions:
+        Here are the top questions from the discussion:
+        1. [Student Name]: [Their question]
+        2. [Student Name]: [Their question]
+        [etc. - include 8-10 entries]
+
+    Response Format for Quotes:
+        Here are the top quotes from the discussion:
+        1. [Student Name]: [The quote they selected]
+        
+        Their analysis: [Explanation]
+        2. [Student Name]: [The quote they selected]
+        
+        Their analysis: [Explanation]
+        [etc. - include 6-7 entries]
+
+    Response Format for Multiple Questions:
+        # Question 1
+        [Direct answer with evidence and quotes]
+
+        # Question 2
+        [Direct answer with evidence and quotes]
+
+        [etc.]
 
     Remember:
-        - Only respond to what was explicitly asked
-        - If the input is gibberish or unclear, respond with the exact error message
-        - Don't try to extract meaning from unclear questions
+        - Start directly with the answer
+        - Include student names with their contributions
+        - Start evaluative responses with "I think..."
+        - Keep question list to 8-10 entries and quote list to 6-7 entries (internally enforced, not mentioned in response)
+        - Reject only completely unrelated questions
+
+    User's question: "${customPrompt}"
 `;
 
   let prompt = "";
