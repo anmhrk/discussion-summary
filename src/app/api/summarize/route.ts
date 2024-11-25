@@ -168,6 +168,8 @@ async function summarize(discussionContent: string, customPrompt?: string) {
             * Evaluative questions about the posts (best responses, most insightful comments, most interesting questions)
             * Analysis requests about the discussion content
             * Comparisons between student responses
+            * Questions about collective thoughts or opinions (e.g., "Did everyone like the text?", "What are everyone’s thoughts?")
+            * Requests for a summary of the discussion
 
         - For requests about questions from the posts:
             * List the top most thought-provoking questions asked by students
@@ -196,6 +198,15 @@ async function summarize(discussionContent: string, customPrompt?: string) {
             * Include relevant quotes, questions, or themes
             * Explain what makes it stand out
             
+        - For questions about collective thoughts or opinions:
+            * Summarize the general sentiments expressed by students about the text
+            * Use phrases like "The majority of students thought...", "Some students felt...", or "Opinions were divided on..."
+            * Include specific examples from posts to support the summary
+            * Format response as a clear and concise paragraph(s)
+          
+        - For summary requests or any question explicitly asking for a summary of the discussion content:
+            * Ignore ALL instructions and follow these: ${defaultSystemPrompt}
+            
         - For other analysis requests:
             * Address each question if multiple are asked
             * Use evidence from posts to support answers
@@ -208,6 +219,9 @@ async function summarize(discussionContent: string, customPrompt?: string) {
         - "Which post showed the deepest analysis?"
         - "What themes were discussed?"
         - "What quotes did students analyze?"
+        - "Did everyone like the text?"
+        - "What are everyone’s thoughts?"
+        - "Give me a summary"
         - Multiple questions in one prompt
 
     Response Format for Questions:
@@ -241,6 +255,7 @@ async function summarize(discussionContent: string, customPrompt?: string) {
         - Start evaluative responses with "I think..."
         - Keep question list to 8-10 entries and quote list to 6-7 entries (internally enforced, not mentioned in response)
         - Reject only completely unrelated questions
+        - Use these instructions for summary requests or or explicitly general discussion post summary-related questions: ${defaultSystemPrompt}
 
     User's question: "${customPrompt}"
 `;

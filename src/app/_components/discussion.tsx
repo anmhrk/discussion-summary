@@ -98,7 +98,7 @@ export const Discussion = () => {
 
       if (response.ok) {
         setSummary(data.summary);
-        toast.success("Summary generated!", { position: "top-center" });
+        toast.success("Response generated!", { position: "top-center" });
         localStorage.setItem("discussionLink", discussionLink);
         if (customPrompt) localStorage.setItem("customPrompt", customPrompt);
         localStorage.setItem("summary", data.summary);
