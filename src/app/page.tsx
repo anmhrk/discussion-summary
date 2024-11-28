@@ -61,8 +61,8 @@ export default function Home() {
           position: "top-center",
         });
       }
-    } catch (error) {
-      toast.error("An unexpected error occurred", { position: "top-center" });
+    } catch (error: any) {
+      toast.error(error.message, { position: "top-center" });
     } finally {
       setIsLoading(false);
     }
@@ -71,8 +71,8 @@ export default function Home() {
   if (isCheckingToken) return null;
 
   return (
-    <main className="min-h-screen pt-20 px-4">
-      <Card className="max-w-3xl mx-auto bg-white dark:bg-[#1D1D1F] shadow-lg rounded-2xl overflow-hidden border-0">
+    <main className="flex-grow flex items-start pt-20 px-4">
+      <Card className="max-w-3xl w-full mx-auto bg-white dark:bg-[#1D1D1F] shadow-lg rounded-2xl overflow-hidden border-0">
         <CardHeader className="bg-gray-100/50 dark:bg-[#1D1D1F] p-6 border-b border-gray-200 dark:border-[#2D2D2F]">
           <div className="flex justify-between items-center">
             <CardTitle className="text-2xl font-semibold">

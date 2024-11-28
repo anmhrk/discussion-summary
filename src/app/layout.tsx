@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { CSPostHogProvider } from "./_analytics/providers";
 import { Navbar } from "../components/common/navbar";
 import { ConvexClientProvider } from "@/components/convex-provider";
+import { Footer } from "@/components/common/footer";
 
 export const metadata: Metadata = {
   title: "Canvas Discussion Summarizer",
@@ -19,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <CSPostHogProvider>
-        <body className="antialiased">
+        <body className="antialiased min-h-screen flex flex-col">
           <ConvexClientProvider>
             <ThemeProvider
               attribute="class"
@@ -28,7 +29,8 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <Navbar />
-              {children}
+              <div className="flex-grow flex flex-col">{children}</div>
+              <Footer />
               <Toaster richColors />
             </ThemeProvider>
           </ConvexClientProvider>

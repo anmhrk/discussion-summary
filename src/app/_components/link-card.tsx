@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, LinkIcon, XCircle } from "lucide-react";
+import { CheckCircle2, LinkIcon, Users, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StudentsModal } from "./students-modal";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export const LinkCard = () => {
   const [discussionLink, setDiscussionLink] = useState("");
@@ -12,7 +14,24 @@ export const LinkCard = () => {
   const [isLinkValid, setIsLinkValid] = useState<boolean | null>(null);
   const [isValidatingLink, setIsValidatingLink] = useState(false);
   const [isFetchingStudents, setIsFetchingStudents] = useState(false);
+  const [hasFetchedStudents, setHasFetchedStudents] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [students, setStudents] = useState<string[]>([]);
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (isLinkValid) {
+      fetchStudents().finally(() => setIsFetchingStudents(false));
+    }
+
+    if (hasFetchedStudents && discussionLink) {
+      setStudents([]);
+      setSelectedStudents([]);
+      setHasFetchedStudents(false);
+    }
+  }, [discussionLink, isLinkValid]);
 
   const validateCanvasUrl = (url: string) => {
     try {
@@ -22,14 +41,12 @@ export const LinkCard = () => {
         return false;
       }
 
-      const pathRegex = /^\/courses\/\d+\/discussion_topics\/\d+$/;
+      const pathRegex = /^\/courses\/\d+\/discussion_topics\/\d{7}$/;
       return pathRegex.test(urlObj.pathname);
     } catch {
       return false;
     }
   };
-
-  const fetchStudents = async () => {};
 
   const handleLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -37,6 +54,7 @@ export const LinkCard = () => {
     setDiscussionLink(value);
     setIsValidatingLink(true);
     setIsLinkValid(null);
+    setError(null);
 
     setTimeout(() => {
       setIsValidatingLink(false);
@@ -48,10 +66,40 @@ export const LinkCard = () => {
       } else {
         setIsLinkValid(false);
       }
-    }, 1000);
+    }, 300);
   };
 
-  const handleSummarize = () => {};
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch("/api/students", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ link: discussionLink }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "An unexpected error occurred");
+      }
+
+      const data = await response.json();
+
+      if (data.participants.length < 15) {
+        throw new Error("Not enough participants yet. Please try again later!");
+      }
+
+      setStudents(data.participants);
+      setHasFetchedStudents(true);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setIsFetchingStudents(false);
+    }
+  };
+
+  const handleGenerate = () => {};
 
   return (
     <>
@@ -89,8 +137,45 @@ export const LinkCard = () => {
               <span>Invalid link</span>
             </div>
           )}
+          {discussionLink && isFetchingStudents && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <span>Fetching students...</span>
+            </div>
+          )}
+          {hasFetchedStudents && (
+            <div className="flex items-center space-x-2 text-sm text-green-600 dark:text-green-400">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Fetched students</span>
+            </div>
+          )}
+          {error !== null && !hasFetchedStudents && (
+            <div className="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400">
+              <XCircle className="w-4 h-4" />
+              <span>{error}</span>
+            </div>
+          )}
         </div>
       </div>
+      {discussionLink && (students.length != 0) === true && (
+        <>
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button variant="custom" className="w-full">
+                <Users className="w-4 h-4" />
+                Select Students
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <StudentsModal
+                students={students}
+                selectedStudents={selectedStudents}
+                setSelectedStudents={setSelectedStudents}
+              />
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
       <div className="space-y-2">
         <Label
           htmlFor="custom-prompt"
@@ -103,16 +188,16 @@ export const LinkCard = () => {
           placeholder="Example: 'What do the posts say about the theme of love?' Leave blank for a general summary"
           value={customPrompt}
           onChange={(e) => setCustomPrompt(e.target.value)}
-          className="w-full rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 h-24 focus:ring-[#2997FF]"
+          className="w-full rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 h-24 focus:ring-[#2997FF] dark:focus:ring-[#2997FF]"
         />
       </div>
       <Button
-        onClick={handleSummarize}
-        disabled={isLoading || !isLinkValid}
+        onClick={handleGenerate}
+        disabled={isLoading || selectedStudents.length === 0}
         className="w-full bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <LinkIcon className="w-4 h-4 mr-2" />
-        {isLoading ? "Summarizing..." : "Summarize"}
+        <LinkIcon className="w-4 h-4" />
+        {isLoading ? "Generating..." : "Generate"}
       </Button>
     </>
   );
