@@ -112,7 +112,8 @@ export const LinkCard = () => {
   };
 
   const handleGenerate = async () => {
-    let discussionId = params?.id || Math.random().toString(36).substring(7);
+    let discussionId =
+      params?.id || Math.random().toString(36).substring(2, 12);
 
     const newLink = await checkIfNewLink({ link: discussionLink });
     if (newLink) {

@@ -46,10 +46,32 @@ export const getResponses = query({
     discussionId: v.string(),
   },
   handler: async (ctx, args) => {
+    const discussion = await ctx.db
+      .query("discussions")
+      .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
+      .first();
+
+    if (!discussion) {
+      return new Error("Discussion not found");
+    }
+
     const responses = await ctx.db
       .query("responses")
-      .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
-      .collect();
-    return responses;
+      .filter((q) => q.eq(q.field("discussionId"), discussion._id))
+      .order("desc")
+      .take(50);
+
+    return await Promise.all(
+      responses.map(async (response) => {
+        return {
+          id: response._id,
+          response: response.response,
+          version: response.version,
+          customPrompt: response.customPrompt,
+          selectedStudents: response.selectedStudents,
+          discussionId: response.discussionId,
+        };
+      })
+    );
   },
 });
