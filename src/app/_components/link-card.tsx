@@ -1,3 +1,18 @@
+// TODOS:
+// once students are fetched, it will match the student list with list in convex db from previous discussions
+// if matched, it will take the selected students stored in db and update selected students array
+
+// will be doing a parallel route implementation for generate button
+// once clicked, it will route to the discussionID but keep the same page
+// link, selected students and custom prompt will be stored in db
+// generate function will be called, above data will be read from db, and response will be displayed to client and stored in db
+// also have a version history of responses, each version should also show the custom prompt if provided
+// if no custom prompt is provided, it should tell that it was a general summary
+// each version should also have a timestamp
+
+// uuid for discussionID
+// https://github.com/vercel/nextgram - for parrallel route implementation
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +22,7 @@ import { CheckCircle2, LinkIcon, Users, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StudentsModal } from "./students-modal";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 export const LinkCard = () => {
   const [discussionLink, setDiscussionLink] = useState("");
@@ -20,6 +36,8 @@ export const LinkCard = () => {
   const [students, setStudents] = useState<string[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
+  const discussionId = Math.random().toString(36).substring(7);
 
   useEffect(() => {
     if (isLinkValid) {
@@ -99,7 +117,9 @@ export const LinkCard = () => {
     }
   };
 
-  const handleGenerate = () => {};
+  const handleGenerate = () => {
+    router.push(`/discussion/${discussionId}`);
+  };
 
   return (
     <>
@@ -193,7 +213,7 @@ export const LinkCard = () => {
       </div>
       <Button
         onClick={handleGenerate}
-        disabled={isLoading || selectedStudents.length === 0}
+        // disabled={isLoading || selectedStudents.length === 0}
         className="w-full bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <LinkIcon className="w-4 h-4" />

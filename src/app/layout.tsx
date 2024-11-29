@@ -3,8 +3,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { CSPostHogProvider } from "./_analytics/providers";
-import { Navbar } from "../components/common/navbar";
 import { ConvexClientProvider } from "@/components/convex-provider";
+import { Navbar } from "../components/common/navbar";
 import { Footer } from "@/components/common/footer";
 
 export const metadata: Metadata = {
@@ -14,8 +14,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  discussion,
 }: Readonly<{
   children: React.ReactNode;
+  discussion: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -29,7 +31,10 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <Navbar />
-              <div className="flex-grow flex flex-col">{children}</div>
+              <main className="flex-grow">
+                {children}
+                {discussion}
+              </main>
               <Footer />
               <Toaster richColors />
             </ThemeProvider>
