@@ -31,7 +31,7 @@ export const LinkCard = () => {
 
   const insertDiscussion = useMutation(api.discussion.createDiscussion);
   const insertResponse = useMutation(api.response.createResponse);
-  const checkLinkExists = useMutation(api.discussion.checkLinkExists);
+  const checkIfNewLink = useMutation(api.discussion.checkIfNewLink);
 
   useEffect(() => {
     if (isLinkValid) {
@@ -114,8 +114,8 @@ export const LinkCard = () => {
   const handleGenerate = async () => {
     let discussionId = params?.id || Math.random().toString(36).substring(7);
 
-    const linkExists = await checkLinkExists({ link: discussionLink });
-    if (!linkExists) {
+    const newLink = await checkIfNewLink({ link: discussionLink });
+    if (newLink) {
       discussionId = Math.random().toString(36).substring(7);
     }
 

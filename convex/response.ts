@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const createResponse = mutation({
@@ -38,5 +38,18 @@ export const createResponse = mutation({
     } catch (error) {
       throw new Error("Server error");
     }
+  },
+});
+
+export const getResponses = query({
+  args: {
+    discussionId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const responses = await ctx.db
+      .query("responses")
+      .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
+      .collect();
+    return responses;
   },
 });
