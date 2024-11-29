@@ -51,7 +51,7 @@ export default function Home() {
 
       if (response.ok) {
         const { userData } = data;
-        insertUser({ name: userData.name, userId: userData.userId });
+        insertUser({ name: userData.name, userId: String(userData.userId) });
         login({ token: accessToken, userId: userData.userId });
         toast.success("API token validated successfully", {
           position: "top-center",

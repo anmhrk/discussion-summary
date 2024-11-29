@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { link } = await request.json();
+    const { link, token } = await request.json();
     const urlPattern =
       /https?:\/\/([^\/]+)\/courses\/(\d+)\/discussion_topics\/(\d+)/;
     const match = link.match(urlPattern);
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       `https://${domain}/api/v1/courses/${courseId}/discussion_topics/${discussionId}/view`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.CANVAS_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );

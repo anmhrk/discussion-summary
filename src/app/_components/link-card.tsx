@@ -1,28 +1,16 @@
-// TODOS:
-// once students are fetched, it will match the student list with list in convex db from previous discussions
-// if matched, it will take the selected students stored in db and update selected students array
-
-// will be doing a parallel route implementation for generate button
-// once clicked, it will route to the discussionID but keep the same page
-// link, selected students and custom prompt will be stored in db
-// generate function will be called, above data will be read from db, and response will be displayed to client and stored in db
-// also have a version history of responses, each version should also show the custom prompt if provided
-// if no custom prompt is provided, it should tell that it was a general summary
-// each version should also have a timestamp
-
-// uuid for discussionID
-// https://github.com/vercel/nextgram - for parrallel route implementation
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, LinkIcon, Users, XCircle } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LinkIcon, Users } from "lucide-react";
 import { StudentsModal } from "./students-modal";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { toast } from "sonner";
+import { Messages } from "./messages";
 
 export const LinkCard = () => {
   const [discussionLink, setDiscussionLink] = useState("");
@@ -32,12 +20,18 @@ export const LinkCard = () => {
   const [isFetchingStudents, setIsFetchingStudents] = useState(false);
   const [hasFetchedStudents, setHasFetchedStudents] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [students, setStudents] = useState<string[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const token = localStorage.getItem("canvasApiToken");
   const router = useRouter();
-  const discussionId = Math.random().toString(36).substring(7);
+  const params = useParams<{ id: string }>();
+
+  const insertDiscussion = useMutation(api.discussion.createDiscussion);
+  const insertResponse = useMutation(api.response.createResponse);
+  const checkLinkExists = useMutation(api.discussion.checkLinkExists);
 
   useEffect(() => {
     if (isLinkValid) {
@@ -94,7 +88,7 @@ export const LinkCard = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ link: discussionLink }),
+        body: JSON.stringify({ link: discussionLink, token }),
       });
 
       if (!response.ok) {
@@ -117,8 +111,69 @@ export const LinkCard = () => {
     }
   };
 
-  const handleGenerate = () => {
-    router.push(`/discussion/${discussionId}`);
+  const handleGenerate = async () => {
+    let discussionId = params?.id || Math.random().toString(36).substring(7);
+
+    const linkExists = await checkLinkExists({ link: discussionLink });
+    if (!linkExists) {
+      discussionId = Math.random().toString(36).substring(7);
+    }
+
+    setIsLoading(true);
+    try {
+      if (selectedStudents.length < 10) {
+        throw new Error(
+          "Please select at least 10 students for a meaningful response"
+        );
+      }
+
+      toast.loading("Generating response...", {
+        id: "loading",
+        position: "top-center",
+      });
+
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          link: discussionLink,
+          customPrompt,
+          selectedStudents,
+          token,
+        }),
+      });
+
+      const data = await response.json();
+
+      toast.dismiss("loading");
+
+      if (response.ok) {
+        insertDiscussion({
+          currentUserId: localStorage.getItem("userId") || "",
+          discussionId: discussionId,
+          link: discussionLink,
+          students: students,
+        });
+
+        insertResponse({
+          currentDiscussionId: discussionId,
+          customPrompt: customPrompt,
+          selectedStudents: selectedStudents,
+          response: data.summary,
+        });
+
+        toast.success("Response generated!", { position: "top-center" });
+        router.push(`/discussion/${discussionId}`);
+      } else {
+        toast.dismiss("loading");
+        throw new Error(data.error || "An unexpected error occurred");
+      }
+    } catch (error: any) {
+      toast.dismiss("loading");
+      toast.error(error.message, { position: "top-center", duration: 5000 });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -139,42 +194,14 @@ export const LinkCard = () => {
             onChange={handleLinkChange}
             className="w-full rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 focus:ring-[#2997FF] dark:focus:ring-[#2997FF] focus:border-transparent"
           />
-          {discussionLink && isValidatingLink && (
-            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-              <Skeleton className="h-4 w-4 rounded-full" />
-              <span>Validating link...</span>
-            </div>
-          )}
-          {discussionLink && isLinkValid === true && (
-            <div className="flex items-center space-x-2 text-sm text-green-600 dark:text-green-400">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Link validated successfully</span>
-            </div>
-          )}
-          {discussionLink && isLinkValid === false && (
-            <div className="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400">
-              <XCircle className="w-4 h-4" />
-              <span>Invalid link</span>
-            </div>
-          )}
-          {discussionLink && isFetchingStudents && (
-            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-              <Skeleton className="h-4 w-4 rounded-full" />
-              <span>Fetching students...</span>
-            </div>
-          )}
-          {hasFetchedStudents && (
-            <div className="flex items-center space-x-2 text-sm text-green-600 dark:text-green-400">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Fetched students</span>
-            </div>
-          )}
-          {error !== null && !hasFetchedStudents && (
-            <div className="flex items-center space-x-2 text-sm text-red-600 dark:text-red-400">
-              <XCircle className="w-4 h-4" />
-              <span>{error}</span>
-            </div>
-          )}
+          <Messages
+            discussionLink={discussionLink}
+            isValidatingLink={isValidatingLink}
+            isLinkValid={isLinkValid}
+            hasFetchedStudents={hasFetchedStudents}
+            isFetchingStudents={isFetchingStudents}
+            error={error}
+          />
         </div>
       </div>
       {discussionLink && (students.length != 0) === true && (
@@ -213,7 +240,7 @@ export const LinkCard = () => {
       </div>
       <Button
         onClick={handleGenerate}
-        // disabled={isLoading || selectedStudents.length === 0}
+        disabled={isLoading || selectedStudents.length === 0}
         className="w-full bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <LinkIcon className="w-4 h-4" />
