@@ -2,9 +2,10 @@
 // - implement loading spinner in this page
 // - make version history for response component
 // - make not found and not authorized components
-// - make the parallel route for response
 // - finish history sidebar
 // - populate custom prompt and link in link card from params
+// - on / route, when making a new response, check first for existing link in db
+// - if found, make new response with that discussion id and route to that discussion page
 
 "use client";
 
@@ -12,10 +13,10 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import React, { useEffect, useState } from "react";
 import { LinkCard } from "@/app/_components/link-card";
-import { Response } from "@/app/@discussion/(.)discussion/[id]/response";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { PageWrapper } from "@/components/common/page-wrapper";
 import { Label } from "@/components/ui/label";
+import { Response } from "@/app/_components/response";
 
 export type Response = {
   id: Id<"responses">;

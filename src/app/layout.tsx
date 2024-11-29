@@ -12,10 +12,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  discussion,
 }: Readonly<{
   children: React.ReactNode;
-  discussion: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -29,7 +27,6 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               {children}
-              {discussion}
               <Toaster richColors />
             </ThemeProvider>
           </ConvexClientProvider>
