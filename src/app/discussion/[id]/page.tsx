@@ -1,10 +1,10 @@
 // TODOS:
-// - fix styling
 // - implement loading spinner in this page
 // - make version history for response component
 // - make not found and not authorized components
 // - make the parallel route for response
 // - finish history sidebar
+// - populate custom prompt and link in link card from params
 
 "use client";
 
@@ -14,13 +14,7 @@ import React, { useEffect, useState } from "react";
 import { LinkCard } from "@/app/_components/link-card";
 import { Response } from "@/app/@discussion/(.)discussion/[id]/response";
 import { Id } from "../../../../convex/_generated/dataModel";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { PageWrapper } from "@/components/common/page-wrapper";
 import { Label } from "@/components/ui/label";
 
 export type Response = {
@@ -96,33 +90,21 @@ export default function DiscussionPage({
   }
 
   return (
-    <main className="flex-grow flex-col flex items-start pt-20 px-4 space-y-4">
-      <Card className="max-w-3xl w-full mx-auto bg-white dark:bg-[#1D1D1F] shadow-lg rounded-2xl overflow-hidden border-0">
-        <CardHeader className="bg-gray-100/50 dark:bg-[#1D1D1F] p-6 border-b border-gray-200 dark:border-[#2D2D2F]">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl font-semibold">
-              Canvas Discussion Summarizer
-            </CardTitle>
-          </div>
-          <CardDescription className="text-gray-600 dark:text-[#86868B] mt-2">
-            Generate summaries of Human Event discussion boards in seconds
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6 mb-3">
-          <LinkCard />
-          <Label
-            htmlFor="summary"
-            className="text-sm font-semibold text-gray-700 dark:text-gray-300"
-          >
-            Summary
-          </Label>
-          <Response
-            responses={responses}
-            latestResponse={latestResponse}
-            setLatestResponse={setLatestResponse}
-          />
-        </CardContent>
-      </Card>
-    </main>
+    <PageWrapper>
+      <LinkCard />
+      <div className="space-y-2">
+        <Label
+          htmlFor="summary"
+          className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+        >
+          Response
+        </Label>
+        <Response
+          responses={responses}
+          latestResponse={latestResponse}
+          setLatestResponse={setLatestResponse}
+        />
+      </div>
+    </PageWrapper>
   );
 }

@@ -238,6 +238,9 @@ export const LinkCard = () => {
           onChange={(e) => setCustomPrompt(e.target.value)}
           className="w-full rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 h-24 focus:ring-[#2997FF] dark:focus:ring-[#2997FF]"
         />
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Note: Non-discussion related prompts will be ignored.
+        </p>
       </div>
       <Button
         onClick={handleGenerate}

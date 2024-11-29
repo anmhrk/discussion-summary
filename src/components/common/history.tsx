@@ -1,4 +1,4 @@
-import { InfoIcon, PencilEditIcon, MenuIcon } from "@/components/common/icons";
+import { InfoIcon, PencilEditIcon } from "@/components/common/icons";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -7,23 +7,18 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import Link from "next/link";
-import { useState } from "react";
 
-export const History = () => {
-  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+interface HistoryProps {
+  isHistoryVisible: boolean;
+  setIsHistoryVisible: (state: boolean) => void;
+}
 
+export const History = ({
+  isHistoryVisible,
+  setIsHistoryVisible,
+}: HistoryProps) => {
   return (
     <>
-      <Button
-        variant="outline"
-        className="p-1.5 h-fit rounded-lg"
-        onClick={() => {
-          setIsHistoryVisible(true);
-        }}
-      >
-        <MenuIcon />
-      </Button>
-
       <Sheet
         open={isHistoryVisible}
         onOpenChange={(state) => {

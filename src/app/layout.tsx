@@ -4,8 +4,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { CSPostHogProvider } from "./_analytics/providers";
 import { ConvexClientProvider } from "@/components/convex-provider";
-import { Navbar } from "../components/common/navbar";
-import { Footer } from "@/components/common/footer";
 
 export const metadata: Metadata = {
   title: "Canvas Discussion Summarizer",
@@ -22,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <CSPostHogProvider>
-        <body className="antialiased min-h-screen flex flex-col">
+        <body className="antialiased">
           <ConvexClientProvider>
             <ThemeProvider
               attribute="class"
@@ -30,12 +28,8 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <Navbar />
-              <main className="flex-grow">
-                {children}
-                {discussion}
-              </main>
-              <Footer />
+              {children}
+              {discussion}
               <Toaster richColors />
             </ThemeProvider>
           </ConvexClientProvider>
