@@ -24,6 +24,7 @@ export const createResponse = mutation({
       const response = await ctx.db
         .query("responses")
         .filter((q) => q.eq(q.field("discussionId"), currentDiscussion._id))
+        .order("desc")
         .first();
 
       const versionNumber = response ? response.version + 1 : 1;

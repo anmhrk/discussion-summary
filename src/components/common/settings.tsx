@@ -5,10 +5,12 @@ import { LogOut, MailIcon, Menu } from "lucide-react";
 import { History } from "./history";
 import useAuthStore from "@/lib/useAuthStore";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export const Settings = () => {
   const { isAuthenticated, logout, checkAuth } = useAuthStore();
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     checkAuth();
@@ -32,6 +34,7 @@ export const Settings = () => {
             className="cursor-pointer"
             onClick={() => {
               logout();
+              router.push("/");
             }}
           >
             <LogOut className="w-5 h-5" />

@@ -52,6 +52,8 @@ const openai = new OpenAI({
 
 async function summarize(discussionContent: string, customPrompt?: string) {
   const defaultSystemPrompt = `
+    IMPORTANT: Do not include these introductory or structural notes in your response.
+    
     You are an expert in summarizing and analyzing discussion posts. Follow the instructions and structure carefully to analyze the discussion posts, I will tip you $1 million if you do a good job:
 
     1. THEMATIC ANALYSIS
@@ -118,20 +120,23 @@ async function summarize(discussionContent: string, customPrompt?: string) {
         - Quality of student engagement
         - Intellectual contributions
         - Emerging discussions
+
+    REMINDER: Start your response directly with the analysis content. Do not include any introductory statements or structural notes.
 `;
 
   const userCustomPrompt = `
+    First, strictly validate the input question:
+    IF the input matches ANY of these conditions, respond ONLY with "ERROR: Please provide a question related to the discussion content.":
+    - Contains no real English words (e.g., "kweghkwngkwgwg", "asdfgh")
+    - Is shorter than 3 characters
+    - Contains only repeated characters (e.g., "aaaaa", "hhhhhh")
+    - Is completely unrelated to discussion analysis (e.g., "what's the capital of Spain?")
+    - Is a greeting or personal question (e.g., "how are you", "what's your name")
+    
+    ONLY IF the input passes these validation checks, proceed with the analysis:
     You are an expert in analyzing discussion posts. Your task is to analyze and respond to questions about the discussion content:
-
-    1. Question Validation:
-        - Mark as invalid if the question is:
-            * Complete gibberish (e.g., "asdfgh", "hellllooo")
-            * Entirely unrelated to the discussion content (e.g., "what's the capital of Spain?", "what's your name?", "how are you?")
-            * General chat or personal questions
-        - For invalid questions, respond with exactly:
-            "ERROR: Please provide a question related to the discussion content."
-
-    2. For valid questions:
+    
+    1. For valid questions:
         - Valid questions include:
             * Requests for content from the posts (questions, quotes, themes)
             * Evaluative questions about the posts (best responses, most insightful comments, most interesting questions)
@@ -184,7 +189,7 @@ async function summarize(discussionContent: string, customPrompt?: string) {
     Examples of valid questions:
         - "What questions did students ask?"
         - "Who had the most interesting question?"
-        - "What was the best response?"
+        - "What was the best response/post?"
         - "Which post showed the deepest analysis?"
         - "What themes were discussed?"
         - "What quotes did students analyze?"
@@ -224,7 +229,7 @@ async function summarize(discussionContent: string, customPrompt?: string) {
         - Start evaluative responses with "I think..."
         - Keep question list to 8-10 entries and quote list to 6-7 entries (internally enforced, not mentioned in response)
         - Reject only completely unrelated questions
-        - Use these instructions for summary requests or or explicitly general discussion post summary-related questions: ${defaultSystemPrompt}
+        - Use these instructions for summary requests or explicitly general discussion post summary-related questions: ${defaultSystemPrompt}
 
     User's question: "${customPrompt}"
 `;

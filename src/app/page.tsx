@@ -89,7 +89,7 @@ export default function Home() {
                   handleTokenSubmit();
                 }}
                 disabled={isLoading || !accessToken}
-                className="bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-6 rounded-lg transition-colors w-full md:w-fit"
+                className="bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-6 rounded-lg transition-colors w-full md:w-fit min-w-[120px]"
               >
                 {isLoading ? (
                   <Spinner />

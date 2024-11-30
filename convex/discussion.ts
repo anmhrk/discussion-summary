@@ -100,7 +100,7 @@ export const checkIfUserCreatedDiscussion = mutation({
         .first();
 
       if (!user) {
-        return new Error("User not found");
+        return false;
       }
 
       const existingDiscussion = await ctx.db
