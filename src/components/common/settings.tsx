@@ -4,11 +4,15 @@ import { GitIcon } from "./icons";
 import { LogOut, MailIcon, Menu } from "lucide-react";
 import { History } from "./history";
 import useAuthStore from "@/lib/useAuthStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const Settings = () => {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout, checkAuth } = useAuthStore();
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   return (
     <>

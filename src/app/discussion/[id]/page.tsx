@@ -23,8 +23,6 @@ export type Response = {
   link: string;
 };
 
-export const dynamicParams = false;
-
 export default function DiscussionPage({
   params,
 }: {

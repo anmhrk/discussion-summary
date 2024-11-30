@@ -31,7 +31,7 @@ export const createDiscussion = mutation({
         userId: currentUser?._id,
         discussionId: args.discussionId,
         link: args.link,
-        numOfResponses: 1,
+        numOfResponses: 0,
       });
       return discussion;
     } catch (error) {
@@ -40,36 +40,47 @@ export const createDiscussion = mutation({
   },
 });
 
-export const checkIfNewLink = mutation({
+export const checkIfDiscussionExists = mutation({
   args: {
-    link: v.string(),
+    discussionId: v.optional(v.string()),
+    link: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     try {
-      const newLink = await ctx.db
-        .query("discussions")
-        .filter((q) => q.eq(q.field("link"), args.link))
-        .first();
+      if (args.discussionId) {
+        const existingDiscussion = await ctx.db
+          .query("discussions")
+          .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
+          .first();
 
-      return newLink === null;
+        return existingDiscussion !== null;
+      }
+
+      if (args.link) {
+        const existingDiscussion = await ctx.db
+          .query("discussions")
+          .filter((q) => q.eq(q.field("link"), args.link))
+          .first();
+
+        return existingDiscussion !== null;
+      }
     } catch (error) {
       throw new Error("Server error");
     }
   },
 });
 
-export const checkIfDiscussionExists = mutation({
+export const getDiscussionId = mutation({
   args: {
-    discussionId: v.string(),
+    link: v.string(),
   },
   handler: async (ctx, args) => {
     try {
-      const existingDiscussion = await ctx.db
+      const discussion = await ctx.db
         .query("discussions")
-        .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
+        .filter((q) => q.eq(q.field("link"), args.link))
         .first();
-
-      return existingDiscussion !== null;
+      return discussion?.discussionId;
     } catch (error) {
       throw new Error("Server error");
     }

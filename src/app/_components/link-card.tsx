@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LinkIcon, PlusIcon, Users } from "lucide-react";
 import { StudentsModal } from "./students-modal";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { toast } from "sonner";
@@ -44,11 +44,13 @@ export const LinkCard = ({
 
   const token = localStorage.getItem("canvasApiToken");
   const router = useRouter();
-  const params = useParams<{ id: string }>();
 
   const insertDiscussion = useMutation(api.discussion.createDiscussion);
   const insertResponse = useMutation(api.response.createResponse);
-  const checkIfNewLink = useMutation(api.discussion.checkIfNewLink);
+  const checkIfDiscussionExists = useMutation(
+    api.discussion.checkIfDiscussionExists
+  );
+  const getDiscussionId = useMutation(api.discussion.getDiscussionId);
 
   useEffect(() => {
     if (isLinkValid) {
@@ -133,20 +135,24 @@ export const LinkCard = ({
   };
 
   const handleGenerate = async () => {
-    let discussionId =
-      params?.id || Math.random().toString(36).substring(2, 12);
-
-    const newLink = await checkIfNewLink({ link: discussionLink });
-    if (newLink) {
-      discussionId = Math.random().toString(36).substring(7);
-    }
-
     setIsLoading(true);
     try {
       if (selectedStudents.length < 10) {
         throw new Error(
           "Please select at least 10 students for a meaningful response"
         );
+      }
+
+      let discussionId = "";
+
+      const discussionExists = await checkIfDiscussionExists({
+        link: discussionLink,
+      });
+
+      if (discussionExists) {
+        discussionId = (await getDiscussionId({ link: discussionLink })) || "";
+      } else {
+        discussionId = Math.random().toString(36).substring(2, 12);
       }
 
       toast.loading("Generating response...", {
