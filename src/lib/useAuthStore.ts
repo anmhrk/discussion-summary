@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 interface LoginPayload {
-  token: string;
+  phrase: string;
   userId: string;
 }
 
@@ -23,8 +23,8 @@ const useAuthStore = create<AuthState>((set) => ({
 
   setIsAuthenticated: (value: boolean) => set({ isAuthenticated: value }),
 
-  login: ({ token, userId }: LoginPayload) => {
-    localStorage.setItem("canvasApiToken", token);
+  login: ({ phrase, userId }: LoginPayload) => {
+    localStorage.setItem("loginPhrase", phrase);
     localStorage.setItem("userId", userId);
     set({
       isAuthenticated: true,
@@ -32,7 +32,7 @@ const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem("canvasApiToken");
+    localStorage.removeItem("loginPhrase");
     localStorage.removeItem("userId");
     set({
       isAuthenticated: false,
@@ -40,9 +40,9 @@ const useAuthStore = create<AuthState>((set) => ({
   },
 
   checkAuth: () => {
-    const token = localStorage.getItem("canvasApiToken");
-    const id = localStorage.getItem("userId");
-    const isUser = Boolean(token && id && token !== "" && id !== "");
+    const phrase = localStorage.getItem("loginPhrase");
+    const userId = localStorage.getItem("userId");
+    const isUser = Boolean(phrase && userId && phrase !== "" && userId !== "");
     set({
       isAuthenticated: isUser,
     });

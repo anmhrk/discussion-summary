@@ -20,7 +20,7 @@ export const Settings = () => {
     <>
       {isAuthenticated && (
         <>
-          <DropdownMenuItem
+          {/* <DropdownMenuItem
             className="cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
@@ -29,7 +29,7 @@ export const Settings = () => {
           >
             <Menu className="h-4 w-4" />
             View history
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={() => {

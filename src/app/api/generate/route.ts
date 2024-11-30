@@ -273,8 +273,7 @@ async function summarize(discussionContent: string, customPrompt?: string) {
 
 export async function POST(request: Request) {
   try {
-    const { link, customPrompt, selectedStudents, token } =
-      await request.json();
+    const { link, customPrompt, selectedStudents } = await request.json();
 
     const urlPattern =
       /https?:\/\/([^\/]+)\/courses\/(\d+)\/discussion_topics\/(\d+)/;
@@ -285,7 +284,7 @@ export async function POST(request: Request) {
       `https://${domain}/api/v1/courses/${courseId}/discussion_topics/${discussionId}/view`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${process.env.CANVAS_ACCESS_TOKEN}`,
         },
       }
     );

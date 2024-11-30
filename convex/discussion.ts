@@ -27,13 +27,12 @@ export const createDiscussion = mutation({
         return new Error("User not found");
       }
 
-      const discussion = await ctx.db.insert("discussions", {
+      await ctx.db.insert("discussions", {
         userId: currentUser?._id,
         discussionId: args.discussionId,
         link: args.link,
         numOfResponses: 0,
       });
-      return discussion;
     } catch (error) {
       throw new Error("Server error");
     }

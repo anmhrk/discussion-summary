@@ -29,7 +29,7 @@ export const createResponse = mutation({
 
       const versionNumber = response ? response.version + 1 : 1;
 
-      const newResponse = await ctx.db.insert("responses", {
+      await ctx.db.insert("responses", {
         discussionId: currentDiscussion._id,
         customPrompt: args.customPrompt,
         students: args.students,
@@ -42,8 +42,6 @@ export const createResponse = mutation({
       await ctx.db.patch(currentDiscussion._id, {
         numOfResponses: currentDiscussion.numOfResponses + 1,
       });
-
-      return newResponse;
     } catch (error) {
       throw new Error("Server error");
     }
