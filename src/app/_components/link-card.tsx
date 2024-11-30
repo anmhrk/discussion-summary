@@ -296,7 +296,7 @@ export const LinkCard = ({
           Note: Non-discussion related prompts will be ignored.
         </p>
       </div>
-      <div className="flex space-x-3">
+      <div className="md:flex md:space-x-3 space-y-3 md:space-y-0">
         <Button
           onClick={handleGenerate}
           disabled={isLoading || selectedStudents.length === 0}

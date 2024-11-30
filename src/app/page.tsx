@@ -72,7 +72,7 @@ export default function Home() {
             <Label htmlFor="access-token" className="text-sm font-semibold">
               Canvas API Access Token
             </Label>
-            <form className="flex space-x-2">
+            <form className="md:flex md:space-x-2 space-y-3 md:space-y-0">
               <Input
                 type="password"
                 placeholder="Enter your API access token"
@@ -89,7 +89,7 @@ export default function Home() {
                   handleTokenSubmit();
                 }}
                 disabled={isLoading || !accessToken}
-                className="bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors min-w-[120px]"
+                className="bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-6 rounded-lg transition-colors w-full md:w-fit"
               >
                 {isLoading ? (
                   <Spinner />
@@ -101,7 +101,7 @@ export default function Home() {
                 )}
               </Button>
             </form>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400 py-2 md:py-0">
               Note: Token is stored locally in the browser.
             </p>
           </div>

@@ -5,10 +5,10 @@
 - [x] Make dynamic route for each new first discussion response
 - [x] Implement response UI
 - [x] Convex functions to save response versions
-- [ ] History sidebar w/ delete discussion button
+- [ ] Make history sidebar w/ delete discussion button
+- [ ] Improve analytics
+- [x] Mobile responsiveness
 - [ ] Vercel AI SDK integration?
 - [ ] Rate limit generate requests?
 - [ ] Potentially switch models
-- [ ] Improve analytics
-- [ ] Mobile responsiveness
 - [ ] Fix dark mode styling
