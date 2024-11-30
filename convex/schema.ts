@@ -10,6 +10,7 @@ export default defineSchema({
     userId: v.id("users"),
     discussionId: v.string(),
     link: v.string(),
+    numOfResponses: v.number(),
   }).index("by_discussionId", ["discussionId"]),
   responses: defineTable({
     discussionId: v.id("discussions"),

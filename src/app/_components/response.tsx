@@ -2,16 +2,10 @@ import { Response as ResponseType } from "@/app/discussion/[id]/page";
 import ReactMarkdown from "react-markdown";
 
 interface ResponseProps {
-  responses: ResponseType[] | Error;
   latestResponse: ResponseType | null;
-  setLatestResponse: (response: ResponseType) => void;
 }
 
-export const Response = ({
-  responses,
-  latestResponse,
-  setLatestResponse,
-}: ResponseProps) => {
+export const Response = ({ latestResponse }: ResponseProps) => {
   return (
     <div className="w-full prose dark:prose-invert prose-sm max-w-none p-4 rounded-lg border border-gray-300 dark:border-[#2D2D2F] bg-white dark:bg-[#1D1D1F] dark:text-white">
       <ReactMarkdown

@@ -26,7 +26,7 @@ export const createResponse = mutation({
         .filter((q) => q.eq(q.field("discussionId"), currentDiscussion._id))
         .first();
 
-      const versionNumber = response ? response.version + 1 : 0;
+      const versionNumber = response ? response.version + 1 : 1;
 
       const newResponse = await ctx.db.insert("responses", {
         discussionId: currentDiscussion._id,
@@ -36,6 +36,10 @@ export const createResponse = mutation({
         response: args.response,
         version: versionNumber,
         link: args.link,
+      });
+
+      await ctx.db.patch(currentDiscussion._id, {
+        numOfResponses: currentDiscussion.numOfResponses + 1,
       });
 
       return newResponse;

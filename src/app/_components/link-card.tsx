@@ -62,6 +62,10 @@ export const LinkCard = ({
     }
   }, [discussionLink, isLinkValid]);
 
+  useEffect(() => {
+    setCustomPrompt(customPromptFromParams || "");
+  }, [customPromptFromParams]);
+
   const validateCanvasUrl = (url: string) => {
     try {
       const urlObj = new URL(url);

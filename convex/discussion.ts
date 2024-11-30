@@ -31,6 +31,7 @@ export const createDiscussion = mutation({
         userId: currentUser?._id,
         discussionId: args.discussionId,
         link: args.link,
+        numOfResponses: 1,
       });
       return discussion;
     } catch (error) {
@@ -96,6 +97,32 @@ export const checkIfUserCreatedDiscussion = mutation({
         .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
         .first();
       return existingDiscussion?.userId === user._id;
+    } catch (error) {
+      throw new Error("Server error");
+    }
+  },
+});
+
+export const getNumOfResponses = mutation({
+  args: {
+    discussionId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const discussion = await ctx.db
+        .query("discussions")
+        .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
+        .first();
+
+      if (!discussion) {
+        return 0;
+      }
+
+      const numOfResponses = await ctx.db
+        .query("responses")
+        .filter((q) => q.eq(q.field("discussionId"), discussion?._id))
+        .collect();
+      return numOfResponses.length;
     } catch (error) {
       throw new Error("Server error");
     }
