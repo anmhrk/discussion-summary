@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { LinkIcon, Users } from "lucide-react";
+import { LinkIcon, PlusIcon, Users } from "lucide-react";
 import { StudentsModal } from "./students-modal";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useRouter, useParams } from "next/navigation";
@@ -11,17 +11,34 @@ import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { toast } from "sonner";
 import { Messages } from "./messages";
+import Link from "next/link";
 
-export const LinkCard = () => {
-  const [discussionLink, setDiscussionLink] = useState("");
-  const [customPrompt, setCustomPrompt] = useState("");
+export const LinkCard = ({
+  linkFromParams,
+  customPromptFromParams,
+  isMounted,
+  selectedStudentsFromParams,
+  studentsFromParams,
+}: {
+  linkFromParams?: string;
+  customPromptFromParams?: string;
+  isMounted?: boolean;
+  selectedStudentsFromParams?: string[];
+  studentsFromParams?: string[];
+}) => {
+  const [discussionLink, setDiscussionLink] = useState(linkFromParams || "");
+  const [customPrompt, setCustomPrompt] = useState(
+    customPromptFromParams || ""
+  );
   const [isLinkValid, setIsLinkValid] = useState<boolean | null>(null);
   const [isValidatingLink, setIsValidatingLink] = useState(false);
   const [isFetchingStudents, setIsFetchingStudents] = useState(false);
   const [hasFetchedStudents, setHasFetchedStudents] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [students, setStudents] = useState<string[]>([]);
-  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [students, setStudents] = useState<string[]>(studentsFromParams || []);
+  const [selectedStudents, setSelectedStudents] = useState<string[]>(
+    selectedStudentsFromParams || []
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -153,14 +170,15 @@ export const LinkCard = () => {
           currentUserId: localStorage.getItem("userId") || "",
           discussionId: discussionId,
           link: discussionLink,
-          students: students,
         });
 
         insertResponse({
           currentDiscussionId: discussionId,
           customPrompt: customPrompt,
           selectedStudents: selectedStudents,
+          students: students,
           response: data.summary,
+          link: discussionLink,
         });
 
         toast.success("Response generated!", { position: "top-center" });
@@ -191,12 +209,13 @@ export const LinkCard = () => {
             id="discussion-link"
             type="text"
             placeholder="Paste your Canvas discussion link here"
+            disabled={isMounted}
             value={discussionLink}
             onChange={handleLinkChange}
             className="w-full rounded-lg border-gray-300 dark:border-[#2D2D2F] dark:bg-[#1D1D1F] dark:text-white focus:ring-2 focus:ring-[#2997FF] dark:focus:ring-[#2997FF] focus:border-transparent"
           />
           <Messages
-            discussionLink={discussionLink}
+            discussionLink={linkFromParams || discussionLink}
             isValidatingLink={isValidatingLink}
             isLinkValid={isLinkValid}
             hasFetchedStudents={hasFetchedStudents}
@@ -205,13 +224,15 @@ export const LinkCard = () => {
           />
         </div>
       </div>
-      {discussionLink && (students.length != 0) === true && (
+      {isMounted ? (
         <>
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
               <Button variant="custom" className="w-full">
                 <Users className="w-4 h-4" />
-                Select Students
+                {selectedStudents.length !== 0
+                  ? `${selectedStudents.length}/${students.length} students selected`
+                  : "Select Students"}
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -223,6 +244,29 @@ export const LinkCard = () => {
             </DialogContent>
           </Dialog>
         </>
+      ) : (
+        discussionLink &&
+        students.length != 0 && (
+          <>
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                <Button variant="custom" className="w-full">
+                  <Users className="w-4 h-4" />
+                  {selectedStudents.length !== 0
+                    ? `${selectedStudents.length}/${students.length} students selected`
+                    : "Select Students"}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <StudentsModal
+                  students={students}
+                  selectedStudents={selectedStudents}
+                  setSelectedStudents={setSelectedStudents}
+                />
+              </DialogContent>
+            </Dialog>
+          </>
+        )
       )}
       <div className="space-y-2">
         <Label
@@ -242,14 +286,24 @@ export const LinkCard = () => {
           Note: Non-discussion related prompts will be ignored.
         </p>
       </div>
-      <Button
-        onClick={handleGenerate}
-        disabled={isLoading || selectedStudents.length === 0}
-        className="w-full bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <LinkIcon className="w-4 h-4" />
-        {isLoading ? "Generating..." : "Generate"}
-      </Button>
+      <div className="flex space-x-3">
+        <Button
+          onClick={handleGenerate}
+          disabled={isLoading || selectedStudents.length === 0}
+          className="w-full bg-[#2997FF] hover:bg-[#147CE5] text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <LinkIcon className="w-4 h-4" />
+          {isLoading ? "Generating..." : "Generate"}
+        </Button>
+        {isMounted && (
+          <Button disabled={isLoading} className="w-full" variant="custom">
+            <Link href="/" className="flex items-center gap-2">
+              <PlusIcon className="w-4 h-4" />
+              New discussion
+            </Link>
+          </Button>
+        )}
+      </div>
     </>
   );
 };

@@ -6,7 +6,9 @@ export const createResponse = mutation({
     currentDiscussionId: v.string(),
     customPrompt: v.optional(v.string()),
     selectedStudents: v.array(v.string()),
+    students: v.array(v.string()),
     response: v.string(),
+    link: v.string(),
   },
   handler: async (ctx, args) => {
     try {
@@ -29,9 +31,11 @@ export const createResponse = mutation({
       const newResponse = await ctx.db.insert("responses", {
         discussionId: currentDiscussion._id,
         customPrompt: args.customPrompt,
+        students: args.students,
         selectedStudents: args.selectedStudents,
         response: args.response,
         version: versionNumber,
+        link: args.link,
       });
 
       return newResponse;
@@ -46,32 +50,42 @@ export const getResponses = query({
     discussionId: v.string(),
   },
   handler: async (ctx, args) => {
-    const discussion = await ctx.db
-      .query("discussions")
-      .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
-      .first();
+    try {
+      const discussion = await ctx.db
+        .query("discussions")
+        .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
+        .first();
 
-    if (!discussion) {
-      return new Error("Discussion not found");
+      if (!discussion) {
+        return [];
+      }
+
+      const responses = await ctx.db
+        .query("responses")
+        .filter((q) => q.eq(q.field("discussionId"), discussion._id))
+        .order("desc")
+        .take(50);
+
+      if (!responses) {
+        return [];
+      }
+
+      return await Promise.all(
+        responses.map(async (response) => {
+          return {
+            id: response._id,
+            response: response.response,
+            version: response.version,
+            customPrompt: response.customPrompt,
+            selectedStudents: response.selectedStudents,
+            students: response.students,
+            discussionId: response.discussionId,
+            link: response.link,
+          };
+        })
+      );
+    } catch (error) {
+      return [];
     }
-
-    const responses = await ctx.db
-      .query("responses")
-      .filter((q) => q.eq(q.field("discussionId"), discussion._id))
-      .order("desc")
-      .take(50);
-
-    return await Promise.all(
-      responses.map(async (response) => {
-        return {
-          id: response._id,
-          response: response.response,
-          version: response.version,
-          customPrompt: response.customPrompt,
-          selectedStudents: response.selectedStudents,
-          discussionId: response.discussionId,
-        };
-      })
-    );
   },
 });

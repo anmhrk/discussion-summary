@@ -17,7 +17,7 @@ import { SettingsIcon } from "lucide-react";
 
 export const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
-    <main className="overflow-auto bg-gray-50 dark:bg-black text-gray-900 dark:text-white p-8 mt-6">
+    <main className="h-screen overflow-auto bg-gray-50 dark:bg-black text-gray-900 dark:text-white p-10">
       <Card className="max-w-2xl mx-auto bg-white dark:bg-[#1D1D1F] shadow-lg rounded-2xl overflow-hidden border-0">
         <CardHeader className="bg-gray-100/50 dark:bg-[#1D1D1F] p-6 border-b border-gray-200 dark:border-[#2D2D2F]">
           <div className="flex justify-between items-center">

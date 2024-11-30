@@ -6,7 +6,6 @@ export const createDiscussion = mutation({
     currentUserId: v.string(),
     discussionId: v.string(),
     link: v.string(),
-    students: v.array(v.string()),
   },
   handler: async (ctx, args) => {
     try {
@@ -32,7 +31,6 @@ export const createDiscussion = mutation({
         userId: currentUser?._id,
         discussionId: args.discussionId,
         link: args.link,
-        students: args.students,
       });
       return discussion;
     } catch (error) {
