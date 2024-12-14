@@ -2,7 +2,7 @@
 
 ## Project Information
 
-This is a [Next.js](https://nextjs.org/) project built to summarize and ask questions about discussion boards for HON 171/272 at Arizona State University. It uses the [xAI's Grok-beta model](https://x.ai/api) to generate summaries and responses, and is powered by [Convex](https://www.convex.dev/).
+This is a [Next.js](https://nextjs.org/) project built to summarize and ask questions about discussion boards for HON 171/272 (Human Event) at [Arizona State University](https://www.asu.edu/). It uses the [xAI's Grok-beta model](https://x.ai/api) to generate summaries and responses, and is powered by [Convex](https://www.convex.dev/) for the backend.
 
 ## Prerequisites
 
@@ -12,6 +12,7 @@ This is a [Next.js](https://nextjs.org/) project built to summarize and ask ques
   - Convex
   - xAI
   - Posthog
+  - Clerk
 
 ## Setup
 
@@ -38,6 +39,10 @@ This is a [Next.js](https://nextjs.org/) project built to summarize and ask ques
    NEXT_PUBLIC_POSTHOG_HOST=<your-posthog-host-url>
    CONVEX_DEPLOYMENT=<your-convex-deployment>
    NEXT_PUBLIC_CONVEX_URL=<your-convex-url>
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<your-clerk-publishable-key>
+   CLERK_SECRET_KEY=<your-clerk-secret-key>
+   NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
    ```
 
 4. Set up Convex:
@@ -56,10 +61,7 @@ This is a [Next.js](https://nextjs.org/) project built to summarize and ask ques
 
 ## TODOS:
 
-- [ ] Make history sidebar w/ delete discussion button
-- [ ] Improve analytics
-- [ ] Change phrase to api token
+- [x] Make history sidebar w/ delete discussion button
+- [x] Improve analytics
 - [ ] Vercel AI SDK integration
-- [ ] Rate limit generate requests?
 - [ ] Potentially switch models
-- [ ] Fix overall styling
