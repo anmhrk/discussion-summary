@@ -2,12 +2,8 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  users: defineTable({
-    phrase: v.string(),
-    userId: v.string(),
-  }).index("by_userId", ["userId"]),
   discussions: defineTable({
-    userId: v.id("users"),
+    userId: v.string(),
     discussionId: v.string(),
     link: v.string(),
     numOfResponses: v.number(),

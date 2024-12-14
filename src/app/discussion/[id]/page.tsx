@@ -29,7 +29,6 @@ export default function DiscussionPage({
   params: Promise<{ id: string }>;
 }) {
   const [notFound, setNotFound] = useState(false);
-  const [authorized, setAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [latestResponse, setLatestResponse] = useState<Response | null>(null);
   const [gettingResponses, setGettingResponses] = useState(true);
@@ -39,9 +38,6 @@ export default function DiscussionPage({
   const discussionId = unwrappedParams.id;
   const checkIfDiscussionExists = useMutation(
     api.discussion.checkIfDiscussionExists
-  );
-  const checkIfUserCreatedDiscussion = useMutation(
-    api.discussion.checkIfUserCreatedDiscussion
   );
   const getResponses = useQuery(api.response.getResponses, { discussionId });
   const getNumOfResponses = useMutation(api.discussion.getNumOfResponses);
@@ -77,18 +73,12 @@ export default function DiscussionPage({
   };
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId") || "";
     checkIfDiscussionExists({
       discussionId,
     }).then((result) => {
       if (result) {
-        checkIfUserCreatedDiscussion({
-          discussionId,
-          userId,
-        }).then((result) => {
-          setAuthorized(result as boolean);
-          setIsLoading(false);
-        });
+        setNotFound(false);
+        setIsLoading(false);
       } else {
         setNotFound(true);
         setIsLoading(false);
@@ -117,10 +107,6 @@ export default function DiscussionPage({
 
   if (notFound) {
     return <div className="bg-black h-screen">Discussion not found</div>;
-  }
-
-  if (!authorized) {
-    return <div className="bg-black h-screen">Not authorized</div>;
   }
 
   return (

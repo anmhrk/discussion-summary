@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const createDiscussion = mutation({
@@ -18,17 +18,8 @@ export const createDiscussion = mutation({
         return;
       }
 
-      const currentUser = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("userId"), args.currentUserId))
-        .first();
-
-      if (!currentUser) {
-        return new Error("User not found");
-      }
-
       await ctx.db.insert("discussions", {
-        userId: currentUser?._id,
+        userId: args.currentUserId,
         discussionId: args.discussionId,
         link: args.link,
         numOfResponses: 0,
@@ -86,32 +77,23 @@ export const getDiscussionId = mutation({
   },
 });
 
-export const checkIfUserCreatedDiscussion = mutation({
-  args: {
-    discussionId: v.string(),
-    userId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    try {
-      const user = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("userId"), args.userId))
-        .first();
-
-      if (!user) {
-        return false;
-      }
-
-      const existingDiscussion = await ctx.db
-        .query("discussions")
-        .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
-        .first();
-      return existingDiscussion?.userId === user._id;
-    } catch (error) {
-      throw new Error("Server error");
-    }
-  },
-});
+// export const checkIfUserCreatedDiscussion = mutation({
+//   args: {
+//     discussionId: v.string(),
+//     userId: v.string(),
+//   },
+//   handler: async (ctx, args) => {
+//     try {
+//       const existingDiscussion = await ctx.db
+//         .query("discussions")
+//         .filter((q) => q.eq(q.field("discussionId"), args.discussionId))
+//         .first();
+//       return existingDiscussion?.userId === args.userId;
+//     } catch (error) {
+//       throw new Error("Server error");
+//     }
+//   },
+// });
 
 export const getNumOfResponses = mutation({
   args: {
@@ -136,5 +118,23 @@ export const getNumOfResponses = mutation({
     } catch (error) {
       throw new Error("Server error");
     }
+  },
+});
+
+export const getDiscussions = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const discussions = await ctx.db
+      .query("discussions")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .order("desc")
+      .collect();
+
+    return discussions.map((discussion) => ({
+      id: discussion.discussionId,
+      link: discussion.link,
+    }));
   },
 });

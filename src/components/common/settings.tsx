@@ -1,48 +1,43 @@
 import Link from "next/link";
 import { DropdownMenuItem, DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { GitIcon } from "./icons";
-import { LogOut, MailIcon, Menu } from "lucide-react";
+import { MailIcon, Menu, Moon, Sun } from "lucide-react";
 import { History } from "./history";
-import useAuthStore from "@/lib/useAuthStore";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useTheme } from "next-themes";
 
 export const Settings = () => {
-  const { isAuthenticated, logout, checkAuth } = useAuthStore();
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+  const { theme } = useTheme();
+  const { setTheme } = useTheme();
 
   return (
     <>
-      {isAuthenticated && (
-        <>
-          {/* <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              setIsHistoryVisible(true);
-            }}
-          >
-            <Menu className="h-4 w-4" />
-            View history
-          </DropdownMenuItem> */}
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => {
-              logout();
-              router.push("/");
-            }}
-          >
-            <LogOut className="w-5 h-5" />
-            Logout
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-        </>
-      )}
+      <DropdownMenuItem
+        className="cursor-pointer"
+        onClick={(e) => {
+          e.preventDefault();
+          setIsHistoryVisible(true);
+        }}
+      >
+        <Menu className="h-4 w-4" />
+        View history
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        className="cursor-pointer"
+        onClick={(e) => {
+          e.preventDefault();
+          setTheme(theme === "dark" ? "light" : "dark");
+        }}
+      >
+        {theme === "dark" ? (
+          <Sun className="h-4 w-4" />
+        ) : (
+          <Moon className="h-4 w-4" />
+        )}
+        {theme === "dark" ? "Light mode" : "Dark mode"}
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
       <DropdownMenuItem>
         <Link
           href="https://github.com/anmolhurkat/discussion-summary"

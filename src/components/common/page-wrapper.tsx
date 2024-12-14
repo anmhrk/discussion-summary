@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { ThemeToggle } from "./theme-toggle";
 import { Settings } from "./settings";
 import {
   DropdownMenu,
@@ -14,6 +13,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { SettingsIcon } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
 
 export const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -38,7 +38,7 @@ export const PageWrapper = ({ children }: { children: React.ReactNode }) => {
                   <Settings />
                 </DropdownMenuContent>
               </DropdownMenu>
-              <ThemeToggle />
+              <UserButton />
             </div>
           </div>
           <CardDescription className="text-gray-600 dark:text-[#86868B] mt-2 hidden sm:block">

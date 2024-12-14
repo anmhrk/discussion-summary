@@ -12,6 +12,8 @@ import { api } from "../../../convex/_generated/api";
 import { toast } from "sonner";
 import { Messages } from "./messages";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
+import { v4 as uuidv4 } from "uuid";
 
 export const LinkCard = ({
   linkFromParams,
@@ -49,6 +51,7 @@ export const LinkCard = ({
     api.discussion.checkIfDiscussionExists
   );
   const getDiscussionId = useMutation(api.discussion.getDiscussionId);
+  const { user } = useUser();
 
   useEffect(() => {
     if (isLinkValid) {
@@ -104,7 +107,7 @@ export const LinkCard = ({
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch("/api/students", {
+      const response = await fetch("/api/fetch-students", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -150,7 +153,7 @@ export const LinkCard = ({
       if (discussionExists) {
         discussionId = (await getDiscussionId({ link: discussionLink })) || "";
       } else {
-        discussionId = Math.random().toString(36).substring(2, 12);
+        discussionId = uuidv4();
       }
 
       toast.loading("Generating response...", {
@@ -174,7 +177,7 @@ export const LinkCard = ({
 
       if (response.ok) {
         await insertDiscussion({
-          currentUserId: localStorage.getItem("userId") || "",
+          currentUserId: user?.id || "",
           discussionId: discussionId,
           link: discussionLink,
         });
